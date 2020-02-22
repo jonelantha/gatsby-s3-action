@@ -1,117 +1,129 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+# gatsby-s3-action
 
-# Create a JavaScript Action using TypeScript
+**Deploy a Gatsby site to an AWS S3 bucket and optionally invalidate a CloudFront distribution**
 
-Use this template to bootstrap the creation of a JavaScript action.:rocket:
+- Copies a Gatsby site to the root of an S3 bucket (uses `sync` so old files in the bucket will be removed).
+- Sets cache headers as defined by the rules described in the [Gatsby documentation](https://www.gatsbyjs.org/docs/caching/).
+- Fast - uses AWS Cli commands for mass file operations which only create/modify files as needed.
+- Suitable for hosting with or without CloudFront. If a CloudFront distribution is specified then it will be invalidated after deployment.
 
-This template includes compilication support, tests, a validation workflow, publishing, and versioning guidance.  
+## S3 Static Website Hosting
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+This section describes the use of this action if you're hosting directly from an S3 bucket using **S3 Static Website Hosting** (without CloudFront). If you're using CloudFront please see the section below.
 
-## Create an action from this template
+### Typical workflow yaml file:
 
-Click the `Use this Template` and provide the new repo details for your action
+```yml
+name: Deploy
 
-## Code in Master
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-Install the dependencies  
-```bash
-$ npm install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - name: Deploy
+        uses: jonelantha/gatsby-s3-action@v1
+        with:
+          dest-s3-bucket: your_bucket
 ```
+### Notes:
 
-Build the typescript
-```bash
-$ npm run build
+- `your_bucket` should be changed to the name of your bucket
+- You'll need to [setup an AWS IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html) with `Programmatic Access` and then configure the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` in the Settings/Secrets area of the repo. Ideally you should follow [Amazon IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) and grant least privileges to the user:
+  - `s3:ListBucket` on `arn:aws:s3:::your_bucket`
+  - `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on `arn:aws:s3:::your_bucket/*`
+- For the S3 Static Website Hosting settings:
+  - Index Document should be `index.html`
+  - Error Document should be `404.html`
+- If you plan to use Gatsby redirects you'll need to use a Gatsby redirect plugin such as one of the following:
+  - [gatsby-plugin-client-side-redirect](https://www.gatsbyjs.org/packages/gatsby-plugin-client-side-redirect/)
+  - [gatsby-plugin-meta-redirect](https://www.gatsbyjs.org/packages/gatsby-plugin-meta-redirect/)
+
+
+## S3 / CloudFront hosting
+
+This section describes usage for when your Gatsby site is stored on S3 and a served via a CloudFront distribution.
+
+### Typical workflow yaml file:
+
+```yml
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      - name: Deploy
+        uses: jonelantha/gatsby-s3-action@v1
+        with:
+          dest-s3-bucket: your_bucket
+          cloudfront-id-to-invalidate: YOURCLOUDFRONTID
 ```
+### Notes:
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
+- `your_bucket` should be changed to the name of your bucket
+- `YOURCLOUDFRONTID` should be changed to the ID of your CloudFront distribution
+- You'll need to [setup an AWS IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html) with `Programmatic Access` and then configure the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` in the Settings/Secrets area of the repo. Ideally you should follow [Amazon IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) and grant least privileges to the user:
+  - `s3:ListBucket` on the `arn:aws:s3:::your_bucket`
+  - `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on `arn:aws:s3:::your_bucket/*`
+  - `cloudfront:CreateInvalidation` on `arn:aws:cloudfront::YOURACCOUNT_ID:distribution/YOURCLOUDFRONTID`
+- The S3 bucket does not need to be set for public access. The CloudFront distribution should have access to your bucket (this is easy to configure when setting up the CloudFront distribution).
+- You will need to setup a [lambda@edge](https://aws.amazon.com/lambda/edge/) function on the CloudFront distribution to properly handle serving up `index.html` files, more information in [this guide](https://tinyendian.com/articles/better-origin-response-function-for-cloudfront-hosted-static-pages/)
+- If you plan to use Gatsby redirects you'll need to use a Gatsby redirect plugin such as one of the following:
+  - [gatsby-plugin-client-side-redirect](https://www.gatsbyjs.org/packages/gatsby-plugin-client-side-redirect/)
+  - [gatsby-plugin-meta-redirect](https://www.gatsbyjs.org/packages/gatsby-plugin-meta-redirect/)
 
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
+## Action Parameters Reference
 
-...
-```
+### dest-s3-bucket (required)
+The destination S3 Bucket 
 
-## Change action.yml
+### browser-cache-duration (optional)
+The cache duration (in seconds) to instruct browsers to cache files for. This is only for files which should be cached as per [Gatsby caching recommendations](https://www.gatsbyjs.org/docs/caching/). Default is 31536000 (1 year)
 
-The action.yml contains defines the inputs and output for your action.
+### cdn-cache-duration (optional)
+The cache duration (in seconds) to instruct a CDN (if there is one) to cache files for. If on a development environment and you want to avoid issuing CloudFront invalidations you could set this to 0. Default is 31536000 (1 year)
 
-Update the action.yml with your name, description, inputs and outputs for your action.
-
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos.  We will create a releases branch and only checkin production modules (core in this case). 
-
-Comment out node_modules in .gitignore and create a releases/v1 branch
-```bash
-# comment out in distribution branches
-# node_modules/
-```
-
-```bash
-$ git checkout -b releases/v1
-$ git commit -a -m "prod dependencies"
-```
-
-```bash
-$ npm prune --production
-$ git add node_modules
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing the releases/v1 branch
-
-```yaml
-uses: actions/typescript-action@releases/v1
-with:
-  milliseconds: 1000
-```
-
-See the [actions tab](https://github.com/actions/javascript-action/actions) for runs of this action! :rocket:
-
-## Usage:
-
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and tested action
-
-```yaml
-uses: actions/typescript-action@v1
-with:
-  milliseconds: 1000
-```
+### cloudfront-id-to-invalidate (optional)
+The ID of the CloudFront distribution to invalidate.
