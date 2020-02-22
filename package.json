@@ -2,7 +2,7 @@
   "name": "typescript-action",
   "version": "0.0.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "Deploy a Gatsby Project to an AWS S3 bucket (optional Cloudfront support)",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -15,17 +15,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/jonelantha/gatsby-s3-action.git"
   },
   "keywords": [
-    "actions",
-    "node",
-    "setup"
+    "deploy",
+    "gatsby",
+    "aws",
+    "s3",
+    "cloudfront",
+    "action"
   ],
-  "author": "YourNameOrOrganization",
+  "author": "jonelantha",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.0"
+    "@actions/core": "^1.2.0",
+    "@actions/exec": "^1.0.3"
   },
   "devDependencies": {
     "@types/jest": "^24.0.23",
