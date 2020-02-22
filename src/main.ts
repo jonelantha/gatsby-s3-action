@@ -1,19 +1,23 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import {getInput, setFailed} from '@actions/core'
+import {getIntInput} from './input'
+import {syncToS3Bucket} from './aws/s3'
+import {invalidateCloudfront} from './aws/cloudfront'
 
-async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`)
+async function deploy(): Promise<void> {
+  await syncToS3Bucket({
+    localSource: './public/',
+    s3Bucket: getInput('dest-s3-bucket', {required: true}),
+    filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
+    browserCacheDuration: getIntInput('browser-cache-duration'),
+    cdnCacheDuration: getIntInput('cdn-cache-duration')
+  })
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    core.setFailed(error.message)
+  const cloudfrontIDToInvalidate = getInput('cloudfront-id-to-invalidate')
+  if (cloudfrontIDToInvalidate) {
+    await invalidateCloudfront({cloudfrontID: cloudfrontIDToInvalidate})
   }
 }
 
-run()
+deploy().catch(error => {
+  setFailed(error.message)
+})

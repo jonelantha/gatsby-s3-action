@@ -1,10 +1,18 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Deploy Gatsby to AWS S3'
+description: 'Deploy a Gatsby Project to an AWS S3 bucket (optional Cloudfront support)'
+author: 'jonelantha'
 inputs:
-  myInput:              # change this
-    description: 'input description here'
-    default: 'default value if applicable'
+  dest-s3-bucket:
+    description: 'Destination S3 Bucket'
+    required: true
+  browser-cache-duration:
+    description: 'Browser cache duration (sec) for cache control headers'
+    default: '31536000'
+  cdn-cache-duration:
+    description: 'CDN cache duration (sec) for cache control headers (sec)'
+    default: '31536000'
+  cloudfront-id-to-invalidate:
+    description: 'Cloudfront ID to invalidate'
 runs:
   using: 'node12'
   main: 'dist/index.js'
