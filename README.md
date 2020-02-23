@@ -116,14 +116,9 @@ jobs:
 
 ## Action Parameters Reference
 
-### dest-s3-bucket (required)
-The destination S3 Bucket 
-
-### browser-cache-duration (optional)
-The cache duration (in seconds) to instruct browsers to cache files for. This is only for files which should be cached as per [Gatsby caching recommendations](https://www.gatsbyjs.org/docs/caching/). Default is 31536000 (1 year)
-
-### cdn-cache-duration (optional)
-The cache duration (in seconds) to instruct a CDN (if there is one) to cache files for. If on a development environment and you want to avoid issuing CloudFront invalidations you could set this to 0. Default is 31536000 (1 year)
-
-### cloudfront-id-to-invalidate (optional)
-The ID of the CloudFront distribution to invalidate.
+| Argument | Status | Description |
+|--------|-------|------------|
+| dest-s3-bucket | Required | The destination S3 Bucket |
+| browser-cache-duration | Optional | The cache duration (in seconds) to instruct browsers to cache files for. This is only for files which should be cached as per [Gatsby caching recommendations](https://www.gatsbyjs.org/docs/caching/). Default is 31536000 (1 year) |
+| cdn-cache-duration | Optional | The cache duration (in seconds) to instruct a CDN (if there is one) to cache files for. If on a development environment and you want to avoid issuing CloudFront invalidations you could set this to 0. Default is 31536000 (1 year) |
+| cloudfront-id-to-invalidate | Optional | The ID of the CloudFront distribution to invalidate. |
