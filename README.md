@@ -7,6 +7,8 @@
 - Fast - uses AWS Cli commands for mass file operations which only create/modify files as needed.
 - Suitable for hosting with or without CloudFront. If a CloudFront distribution is specified then it will be invalidated after deployment.
 
+Please review the associated [GitHub Actions powered Gatsby AWS how-to guide](https://blog.elantha.com/gatsby-s3-cloudfront/) if you're interested in setting up a Gatsby site on AWS from scratch.
+
 ## S3 Static Website Hosting
 
 This section describes the use of this action if you're hosting directly from an S3 bucket using **S3 Static Website Hosting** (without CloudFront). If you're using CloudFront please see the section below.
@@ -62,7 +64,8 @@ jobs:
 
 ## S3 / CloudFront hosting
 
-This section describes usage for when your Gatsby site is stored on S3 and a served via a CloudFront distribution.
+This section describes usage for when your Gatsby site is stored on S3 and a served via a CloudFront distribution. If you're new to AWS you may also be interested in reviewing the [GitHub Actions powered Gatsby AWS how-to guide](https://blog.elantha.com/gatsby-s3-cloudfront/).
+
 
 ### Typical workflow yaml file:
 
@@ -108,8 +111,10 @@ jobs:
   - `s3:ListBucket` on the `arn:aws:s3:::your_bucket`
   - `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on `arn:aws:s3:::your_bucket/*`
   - `cloudfront:CreateInvalidation` on `arn:aws:cloudfront::YOURACCOUNT_ID:distribution/YOURCLOUDFRONTID`
+
+  _For a complete walkthrough of setting up the user, please see the first section of the associated [Setting up Github Actions for Gatsby](https://blog.elantha.com/gatsby-github-actions/) guide_
 - The S3 bucket does not need to be set for public access. The CloudFront distribution should have access to your bucket (this is easy to configure when setting up the CloudFront distribution).
-- You will need to setup a [lambda@edge](https://aws.amazon.com/lambda/edge/) function on the CloudFront distribution to properly handle serving up `index.html` files, more information in [this guide](https://tinyendian.com/articles/better-origin-response-function-for-cloudfront-hosted-static-pages/)
+- You will need to setup a [lambda@edge](https://aws.amazon.com/lambda/edge/) function on the CloudFront distribution to properly handle serving up `index.html` files, more information in [this guide](https://blog.elantha.com/cloudfront-index-lambda/)
 - If you plan to use Gatsby redirects you'll need to use a Gatsby redirect plugin such as one of the following:
   - [gatsby-plugin-client-side-redirect](https://www.gatsbyjs.org/packages/gatsby-plugin-client-side-redirect/)
   - [gatsby-plugin-meta-redirect](https://www.gatsbyjs.org/packages/gatsby-plugin-meta-redirect/)
