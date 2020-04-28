@@ -2,6 +2,9 @@ name: 'Deploy Gatsby to AWS S3'
 description: 'Deploy a Gatsby Project to an AWS S3 bucket (optional Cloudfront support)'
 author: 'jonelantha'
 inputs:
+  public-source-path:
+    description: 'Path to Gatsby /public directory'
+    default: './public/'
   dest-s3-bucket:
     description: 'Destination S3 Bucket'
     required: true
@@ -17,5 +20,5 @@ runs:
   using: 'node12'
   main: 'dist/index.js'
 branding:
-  icon: 'upload-cloud'  
+  icon: 'upload-cloud'
   color: 'orange'

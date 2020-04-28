@@ -4,9 +4,8 @@ import {syncToS3Bucket} from './aws/s3'
 import {invalidateCloudfront} from './aws/cloudfront'
 
 async function deploy(): Promise<void> {
-  const localSource = getInput('public-source-path')
   await syncToS3Bucket({
-    localSource: localSource || './public/',
+    localSource: getInput('public-source-path'),
     s3Bucket: getInput('dest-s3-bucket', {required: true}),
     filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
     browserCacheDuration: getIntInput('browser-cache-duration'),
