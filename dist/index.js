@@ -959,9 +959,8 @@ const input_1 = __webpack_require__(518);
 const s3_1 = __webpack_require__(627);
 const cloudfront_1 = __webpack_require__(471);
 async function deploy() {
-    const localSource = core_1.getInput('public-source-path');
     await s3_1.syncToS3Bucket({
-        localSource: localSource || './public/',
+        localSource: core_1.getInput('public-source-path'),
         s3Bucket: core_1.getInput('dest-s3-bucket', { required: true }),
         filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
         browserCacheDuration: input_1.getIntInput('browser-cache-duration'),
