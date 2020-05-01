@@ -47,10 +47,12 @@ jobs:
         uses: jonelantha/gatsby-s3-action@v1
         with:
           dest-s3-bucket: your_bucket
+          public-source-path: your_gatsby_public_directory
 ```
 ### Notes:
 
 - `your_bucket` should be changed to the name of your bucket
+- `your_gatsby_public_directory` optionally set the path to your gatsby ./public directory (default: ./public/)
 - You'll need to [setup an AWS IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html) with `Programmatic Access` and then configure the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` in the Settings/Secrets area of the repo. Ideally you should follow [Amazon IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) and grant least privileges to the user:
   - `s3:ListBucket` on `arn:aws:s3:::your_bucket`
   - `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on `arn:aws:s3:::your_bucket/*`
