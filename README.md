@@ -7,11 +7,11 @@
 - Fast - uses AWS Cli commands for mass file operations which only create/modify files as needed.
 - Suitable for hosting with or without CloudFront. If a CloudFront distribution is specified then it will be invalidated after deployment.
 
-Please read the notes on the [AWS Setup](#aws-setup) below. For a full step by step guide for setting up from scratch please take a look at [GitHub Actions powered Gatsby AWS how-to guide](https://blog.elantha.com/gatsby-s3-cloudfront/).
+Please read the notes on the [AWS Setup](#aws-setup) below.
 
-### TL;DR - quick recipes
+For a full step by step guide for setting up from scratch please take a look at [GitHub Actions powered Gatsby AWS how-to guide](https://blog.elantha.com/gatsby-s3-cloudfront/).
 
-#### S3 Static Hosting, no CloudFront
+### QUICK RECIPE: S3 Static Hosting, no CloudFront
 
 ```yml
 name: Deploy
@@ -51,7 +51,7 @@ jobs:
 - `your_bucket` should be changed to the name of your bucket
 - See [Parameters Reference](#parameters-reference) below for the full list of parameters
 
-#### With CloudFront
+### QUICK RECIPE: With CloudFront
 
 Add the `cloudfront-id-to-invalidate` parameter to specify the ID of a distribution to be invalidated after deployment.
 
@@ -63,7 +63,7 @@ Add the `cloudfront-id-to-invalidate` parameter to specify the ID of a distribut
           cloudfront-id-to-invalidate: CLOUDFRONTID
 ```
 
-#### With a non-standard Gatsby build directory (default is ./public/):
+### QUICK RECIPE: With a non-standard Gatsby build directory (default is ./public/):
 
 Gatsby builds to ./public by default. If you've changed the build directory to something else then use `public-source-path` to specify that directory:
 
@@ -88,11 +88,12 @@ _For a complete walkthrough of setting up the user, please see the first section
 
 ### S3
 
-If you're using CloudFront then the S3 bucket does not need to be set for public access. The CloudFront distribution should have access to your bucket, see the [CloudFront](#cloudfront) section below.
-
-If instead you're using S3 Static Website hosting without CloudFront then you should use these S3 Static Website Hosting settings:
-  - **Index Document**: `index.html`
-  - **Error Document**: `404.html`
+- With CloudFront:
+  - The S3 bucket does not need to be set for public access but the CloudFront distribution should have access to your bucket, see the [CloudFront](#cloudfront) section below.
+- Without CloudFront, S3 Static Website hosting only:
+  - Use these S3 Static Website Hosting settings:
+    - **Index Document**: `index.html`
+    - **Error Document**: `404.html`
 
 ### CloudFront
 
