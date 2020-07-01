@@ -3,31 +3,39 @@ import {exec} from '@actions/exec'
 export async function syncToS3Bucket({
   localSource,
   s3Bucket,
+  s3Path,
   filesNotToBrowserCache,
   browserCacheDuration,
   cdnCacheDuration
 }: SyncS3Params): Promise<void> {
-  await syncEverythingWithBrowserCaching(
+  const destination = makeS3Destination(s3Bucket, s3Path)
+
+  await syncAllFiles(
     localSource,
-    s3Bucket,
+    destination,
     browserCacheDuration,
     cdnCacheDuration
   )
 
-  await setNoBrowserCaching(s3Bucket, filesNotToBrowserCache, cdnCacheDuration)
+  await setNoBrowserCaching(
+    destination,
+    filesNotToBrowserCache,
+    cdnCacheDuration
+  )
 }
 
 interface SyncS3Params {
   localSource: string
   s3Bucket: string
+  s3Path: string
   filesNotToBrowserCache: string[]
   browserCacheDuration: number
   cdnCacheDuration: number
 }
 
-async function syncEverythingWithBrowserCaching(
+async function syncAllFiles(
   source: string,
-  s3Bucket: string,
+  destination: string,
   browserCacheDuration: number,
   cdnCacheDuration: number
 ): Promise<void> {
@@ -37,30 +45,42 @@ async function syncEverythingWithBrowserCaching(
   )
 
   await exec(
-    `aws s3 sync ${source} s3://${s3Bucket} \
-    --delete \
-    --cache-control "${browserCachingHeader}"`
+    [
+      `aws s3 sync ${source} ${destination}`,
+      '--delete',
+      `--cache-control "${browserCachingHeader}"`
+    ].join(' ')
   )
 }
 
 async function setNoBrowserCaching(
-  s3Bucket: string,
+  destination: string,
   filePatterns: string[],
   cdnCacheDuration: number
 ): Promise<void> {
   const noBrowserCachingHeader = getCacheControlHeader(0, cdnCacheDuration)
 
   await exec(
-    `aws s3 cp s3://${s3Bucket} s3://${s3Bucket} \
-    --exclude "*" \
-    ${filePatterns.map(pattern => `--include "${pattern}"`).join(' ')}
-    --recursive \
-    --metadata-directive REPLACE \
-    --cache-control "${noBrowserCachingHeader}"`
+    [
+      `aws s3 cp ${destination} ${destination}`,
+      '--exclude "*"',
+      filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
+      '--recursive',
+      '--metadata-directive REPLACE',
+      `--cache-control "${noBrowserCachingHeader}"`
+    ].join(' ')
   )
 }
 
-export function getCacheControlHeader(
+function makeS3Destination(bucket: string, path?: string): string {
+  if (path) {
+    return `s3://${bucket}/${removeLeadingSlash(path)}`
+  } else {
+    return `s3://${bucket}`
+  }
+}
+
+function getCacheControlHeader(
   browserCacheDuration: number,
   cdnCacheDuration: number
 ): string {
@@ -75,4 +95,8 @@ export function getCacheControlHeader(
   header += `, s-maxage=${cdnCacheDuration}`
 
   return header
+}
+
+function removeLeadingSlash(str: string): string {
+  return str.replace(/^\/?/, '')
 }

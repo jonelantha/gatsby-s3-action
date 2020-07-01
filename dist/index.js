@@ -975,6 +975,7 @@ async function deploy() {
     await s3_1.syncToS3Bucket({
         localSource: core_1.getInput('public-source-path'),
         s3Bucket: core_1.getInput('dest-s3-bucket', { required: true }),
+        s3Path: core_1.getInput('dest-s3-path'),
         filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
         browserCacheDuration: input_1.getIntInput('browser-cache-duration'),
         cdnCacheDuration: input_1.getIntInput('cdn-cache-duration')
@@ -1384,25 +1385,38 @@ module.exports = require("path");
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const exec_1 = __webpack_require__(986);
-async function syncToS3Bucket({ localSource, s3Bucket, filesNotToBrowserCache, browserCacheDuration, cdnCacheDuration }) {
-    await syncEverythingWithBrowserCaching(localSource, s3Bucket, browserCacheDuration, cdnCacheDuration);
-    await setNoBrowserCaching(s3Bucket, filesNotToBrowserCache, cdnCacheDuration);
+async function syncToS3Bucket({ localSource, s3Bucket, s3Path, filesNotToBrowserCache, browserCacheDuration, cdnCacheDuration }) {
+    const destination = makeS3Destination(s3Bucket, s3Path);
+    await syncAllFiles(localSource, destination, browserCacheDuration, cdnCacheDuration);
+    await setNoBrowserCaching(destination, filesNotToBrowserCache, cdnCacheDuration);
 }
 exports.syncToS3Bucket = syncToS3Bucket;
-async function syncEverythingWithBrowserCaching(source, s3Bucket, browserCacheDuration, cdnCacheDuration) {
+async function syncAllFiles(source, destination, browserCacheDuration, cdnCacheDuration) {
     const browserCachingHeader = getCacheControlHeader(browserCacheDuration, cdnCacheDuration);
-    await exec_1.exec(`aws s3 sync ${source} s3://${s3Bucket} \
-    --delete \
-    --cache-control "${browserCachingHeader}"`);
+    await exec_1.exec([
+        `aws s3 sync ${source} ${destination}`,
+        '--delete',
+        `--cache-control "${browserCachingHeader}"`
+    ].join(' '));
 }
-async function setNoBrowserCaching(s3Bucket, filePatterns, cdnCacheDuration) {
+async function setNoBrowserCaching(destination, filePatterns, cdnCacheDuration) {
     const noBrowserCachingHeader = getCacheControlHeader(0, cdnCacheDuration);
-    await exec_1.exec(`aws s3 cp s3://${s3Bucket} s3://${s3Bucket} \
-    --exclude "*" \
-    ${filePatterns.map(pattern => `--include "${pattern}"`).join(' ')}
-    --recursive \
-    --metadata-directive REPLACE \
-    --cache-control "${noBrowserCachingHeader}"`);
+    await exec_1.exec([
+        `aws s3 cp ${destination} ${destination}`,
+        '--exclude "*"',
+        filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
+        '--recursive',
+        '--metadata-directive REPLACE',
+        `--cache-control "${noBrowserCachingHeader}"`
+    ].join(' '));
+}
+function makeS3Destination(bucket, path) {
+    if (path) {
+        return `s3://${bucket}/${removeLeadingSlash(path)}`;
+    }
+    else {
+        return `s3://${bucket}`;
+    }
 }
 function getCacheControlHeader(browserCacheDuration, cdnCacheDuration) {
     let header = '';
@@ -1415,7 +1429,9 @@ function getCacheControlHeader(browserCacheDuration, cdnCacheDuration) {
     header += `, s-maxage=${cdnCacheDuration}`;
     return header;
 }
-exports.getCacheControlHeader = getCacheControlHeader;
+function removeLeadingSlash(str) {
+    return str.replace(/^\/?/, '');
+}
 
 
 /***/ }),

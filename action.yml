@@ -8,6 +8,8 @@ inputs:
   dest-s3-bucket:
     description: 'Destination S3 Bucket'
     required: true
+  dest-s3-path:
+    description: 'Destination S3 Path'
   browser-cache-duration:
     description: 'Browser cache duration (sec) for cache control headers'
     default: '31536000'
