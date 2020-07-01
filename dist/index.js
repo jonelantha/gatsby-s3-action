@@ -19,7 +19,13 @@ module.exports =
 /******/ 		};
 /******/
 /******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		var threw = true;
+/******/ 		try {
+/******/ 			modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 			threw = false;
+/******/ 		} finally {
+/******/ 			if(threw) delete installedModules[moduleId];
+/******/ 		}
 /******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.l = true;
@@ -1337,6 +1343,7 @@ exports.getState = getState;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.invalidateCloudfront = void 0;
 const exec_1 = __webpack_require__(986);
 async function invalidateCloudfront({ cloudfrontID, paths }) {
     await exec_1.exec([
@@ -1356,6 +1363,7 @@ exports.invalidateCloudfront = invalidateCloudfront;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getBooleanInput = exports.getIntInput = void 0;
 const core_1 = __webpack_require__(470);
 function getIntInput(name) {
     const stringValue = core_1.getInput(name);
@@ -1400,6 +1408,7 @@ module.exports = require("path");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.syncToS3Bucket = void 0;
 const exec_1 = __webpack_require__(986);
 async function syncToS3Bucket({ localSource, s3Bucket, s3Path, syncDelete, filesNotToBrowserCache, browserCacheDuration, cdnCacheDuration }) {
     const destination = makeS3Destination(s3Bucket, s3Path);
