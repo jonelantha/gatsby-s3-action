@@ -1,5 +1,5 @@
 import {getInput, setFailed} from '@actions/core'
-import {getIntInput} from './input'
+import {getIntInput, getBooleanInput} from './input'
 import {syncToS3Bucket} from './aws/s3'
 import {invalidateCloudfront} from './aws/cloudfront'
 
@@ -8,6 +8,7 @@ async function deploy(): Promise<void> {
     localSource: getInput('public-source-path'),
     s3Bucket: getInput('dest-s3-bucket', {required: true}),
     s3Path: getInput('dest-s3-path'),
+    syncDelete: getBooleanInput('sync-delete'),
     filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
     browserCacheDuration: getIntInput('browser-cache-duration'),
     cdnCacheDuration: getIntInput('cdn-cache-duration')

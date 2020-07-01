@@ -4,6 +4,7 @@ export async function syncToS3Bucket({
   localSource,
   s3Bucket,
   s3Path,
+  syncDelete,
   filesNotToBrowserCache,
   browserCacheDuration,
   cdnCacheDuration
@@ -13,6 +14,7 @@ export async function syncToS3Bucket({
   await syncAllFiles(
     localSource,
     destination,
+    syncDelete,
     browserCacheDuration,
     cdnCacheDuration
   )
@@ -28,6 +30,7 @@ interface SyncS3Params {
   localSource: string
   s3Bucket: string
   s3Path: string
+  syncDelete: boolean
   filesNotToBrowserCache: string[]
   browserCacheDuration: number
   cdnCacheDuration: number
@@ -36,6 +39,7 @@ interface SyncS3Params {
 async function syncAllFiles(
   source: string,
   destination: string,
+  syncDelete: boolean,
   browserCacheDuration: number,
   cdnCacheDuration: number
 ): Promise<void> {
@@ -47,9 +51,11 @@ async function syncAllFiles(
   await exec(
     [
       `aws s3 sync ${source} ${destination}`,
-      '--delete',
+      syncDelete ? '--delete' : undefined,
       `--cache-control "${browserCachingHeader}"`
-    ].join(' ')
+    ]
+      .filter(part => part)
+      .join(' ')
   )
 }
 

@@ -10,6 +10,9 @@ inputs:
     required: true
   dest-s3-path:
     description: 'Destination S3 Path'
+  sync-delete:
+    description: "Boolean, delete files on S3 not present in build (default: true)"
+    default: 'true'
   browser-cache-duration:
     description: 'Browser cache duration (sec) for cache control headers'
     default: '31536000'
