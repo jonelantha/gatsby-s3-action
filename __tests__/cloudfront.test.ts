@@ -6,7 +6,8 @@ jest.mock('@actions/exec')
 const mockedExec = exec as jest.MockedFunction<typeof exec>
 
 const defaultParams = {
-  cloudfrontID: 'abcdef1234'
+  cloudfrontID: 'abcdef1234',
+  paths: '/*'
 }
 
 describe('aws commands to exec', () => {

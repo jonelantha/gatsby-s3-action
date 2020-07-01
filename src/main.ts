@@ -16,7 +16,10 @@ async function deploy(): Promise<void> {
 
   const cloudfrontIDToInvalidate = getInput('cloudfront-id-to-invalidate')
   if (cloudfrontIDToInvalidate) {
-    await invalidateCloudfront({cloudfrontID: cloudfrontIDToInvalidate})
+    await invalidateCloudfront({
+      cloudfrontID: cloudfrontIDToInvalidate,
+      paths: getInput('cloudfront-path-to-invalidate')
+    })
   }
 }
 

@@ -21,6 +21,9 @@ inputs:
     default: '31536000'
   cloudfront-id-to-invalidate:
     description: 'Cloudfront ID to invalidate'
+  cloudfront-path-to-invalidate:
+    description: "Cloudfront Path to invalidate (optional, default: '/*')"
+    default: '/*'
 runs:
   using: 'node12'
   main: 'dist/index.js'
