@@ -2,7 +2,7 @@
 
 **Deploy a Gatsby site to an AWS S3 bucket and optionally invalidate a CloudFront distribution**
 
-- Copies a Gatsby site to the root of an S3 bucket (uses `sync` so old files in the bucket will be removed).
+- Copies a Gatsby site to the root of an S3 bucket (uses `sync --delete` so old files in the bucket will be removed - can be disabled by using `sync-delete: false`, see [Parameters Reference](#parameters-reference)).
 - Sets cache headers as defined by the rules described in the [Gatsby documentation](https://www.gatsbyjs.org/docs/caching/).
 - Fast - uses AWS Cli commands for mass file operations which only create/modify files as needed.
 - Suitable for hosting with or without CloudFront. If a CloudFront distribution is specified then it will be invalidated after deployment.
@@ -63,6 +63,18 @@ Add the `cloudfront-id-to-invalidate` parameter to specify the ID of a distribut
           cloudfront-id-to-invalidate: CLOUDFRONTID
 ```
 
+### QUICK RECIPE: Deploy to a sub-directory on S3
+
+Add the `dest-s3-path` parameter to specify a sub-directory to copy to in your bucket.
+
+```yaml
+     - name: Deploy
+        uses: jonelantha/gatsby-s3-action@v1
+        with:
+          dest-s3-bucket: your_bucket
+          dest-s3-path: blog/files
+```
+
 ### QUICK RECIPE: With a non-standard Gatsby build directory (default is ./public/):
 
 Gatsby builds to ./public by default. If you've changed the build directory to something else then use `public-source-path` to specify that directory:
@@ -115,7 +127,10 @@ If you plan to use Gatsby redirects you'll need to use a Gatsby redirect plugin 
 | Argument | Status | Description |
 |--------|-------|------------|
 | dest-s3-bucket | Required | The destination S3 Bucket |
+| dest-s3-path | Optional | The destination S3 Path (defaults to root) |
 | cloudfront-id-to-invalidate | Optional | The ID of the CloudFront distribution to invalidate. |
-| public-source-path | Optional | The path to your gatsby ./public directory. Default: is ./public/ |
+| cloudfront-path-to-invalidate | Optional | The path to invalidate on the CloudFront distribution. See the [CloudFront Invalidation guide](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html) for information on the format (default: `/*`) |
+| public-source-path | Optional | The path to your gatsby ./public directory. Default: is `./public/` |
+| sync-delete | Optional | Boolean: delete files on S3 not in the latest Gatsby build (defaults to 'true') |
 | browser-cache-duration | Optional | The cache duration (in seconds) to instruct browsers to cache files for. This is only for files which should be cached as per [Gatsby caching recommendations](https://www.gatsbyjs.org/docs/caching/). Default is 31536000 (1 year) |
 | cdn-cache-duration | Optional | The cache duration (in seconds) to instruct a CDN (if there is one) to cache files for. If on a development environment and you want to avoid issuing CloudFront invalidations you could set this to 0. Default is 31536000 (1 year) |

@@ -19,7 +19,13 @@ module.exports =
 /******/ 		};
 /******/
 /******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		var threw = true;
+/******/ 		try {
+/******/ 			modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 			threw = false;
+/******/ 		} finally {
+/******/ 			if(threw) delete installedModules[moduleId];
+/******/ 		}
 /******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.l = true;
@@ -975,13 +981,18 @@ async function deploy() {
     await s3_1.syncToS3Bucket({
         localSource: core_1.getInput('public-source-path'),
         s3Bucket: core_1.getInput('dest-s3-bucket', { required: true }),
+        s3Path: core_1.getInput('dest-s3-path'),
+        syncDelete: input_1.getBooleanInput('sync-delete'),
         filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
         browserCacheDuration: input_1.getIntInput('browser-cache-duration'),
         cdnCacheDuration: input_1.getIntInput('cdn-cache-duration')
     });
     const cloudfrontIDToInvalidate = core_1.getInput('cloudfront-id-to-invalidate');
     if (cloudfrontIDToInvalidate) {
-        await cloudfront_1.invalidateCloudfront({ cloudfrontID: cloudfrontIDToInvalidate });
+        await cloudfront_1.invalidateCloudfront({
+            cloudfrontID: cloudfrontIDToInvalidate,
+            paths: core_1.getInput('cloudfront-path-to-invalidate')
+        });
     }
 }
 deploy().catch(error => {
@@ -1332,11 +1343,14 @@ exports.getState = getState;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.invalidateCloudfront = void 0;
 const exec_1 = __webpack_require__(986);
-async function invalidateCloudfront({ cloudfrontID }) {
-    await exec_1.exec(`aws cloudfront create-invalidation \
-    --distribution-id ${cloudfrontID} \
-    --paths /*`);
+async function invalidateCloudfront({ cloudfrontID, paths }) {
+    await exec_1.exec([
+        'aws cloudfront create-invalidation',
+        `--distribution-id ${cloudfrontID}`,
+        `--paths ${paths}`
+    ].join(' '));
 }
 exports.invalidateCloudfront = invalidateCloudfront;
 
@@ -1349,6 +1363,7 @@ exports.invalidateCloudfront = invalidateCloudfront;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getBooleanInput = exports.getIntInput = void 0;
 const core_1 = __webpack_require__(470);
 function getIntInput(name) {
     const stringValue = core_1.getInput(name);
@@ -1359,6 +1374,16 @@ function getIntInput(name) {
     return intValue;
 }
 exports.getIntInput = getIntInput;
+function getBooleanInput(name) {
+    const stringValue = core_1.getInput(name);
+    const lcStringValue = stringValue.toLowerCase();
+    if (lcStringValue === 'true')
+        return true;
+    if (lcStringValue === 'false')
+        return false;
+    throw new RangeError(`Invalid '${name}': ${stringValue}`);
+}
+exports.getBooleanInput = getBooleanInput;
 
 
 /***/ }),
@@ -1383,26 +1408,42 @@ module.exports = require("path");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.syncToS3Bucket = void 0;
 const exec_1 = __webpack_require__(986);
-async function syncToS3Bucket({ localSource, s3Bucket, filesNotToBrowserCache, browserCacheDuration, cdnCacheDuration }) {
-    await syncEverythingWithBrowserCaching(localSource, s3Bucket, browserCacheDuration, cdnCacheDuration);
-    await setNoBrowserCaching(s3Bucket, filesNotToBrowserCache, cdnCacheDuration);
+async function syncToS3Bucket({ localSource, s3Bucket, s3Path, syncDelete, filesNotToBrowserCache, browserCacheDuration, cdnCacheDuration }) {
+    const destination = makeS3Destination(s3Bucket, s3Path);
+    await syncAllFiles(localSource, destination, syncDelete, browserCacheDuration, cdnCacheDuration);
+    await setNoBrowserCaching(destination, filesNotToBrowserCache, cdnCacheDuration);
 }
 exports.syncToS3Bucket = syncToS3Bucket;
-async function syncEverythingWithBrowserCaching(source, s3Bucket, browserCacheDuration, cdnCacheDuration) {
+async function syncAllFiles(source, destination, syncDelete, browserCacheDuration, cdnCacheDuration) {
     const browserCachingHeader = getCacheControlHeader(browserCacheDuration, cdnCacheDuration);
-    await exec_1.exec(`aws s3 sync ${source} s3://${s3Bucket} \
-    --delete \
-    --cache-control "${browserCachingHeader}"`);
+    await exec_1.exec([
+        `aws s3 sync ${source} ${destination}`,
+        syncDelete ? '--delete' : undefined,
+        `--cache-control "${browserCachingHeader}"`
+    ]
+        .filter(part => part)
+        .join(' '));
 }
-async function setNoBrowserCaching(s3Bucket, filePatterns, cdnCacheDuration) {
+async function setNoBrowserCaching(destination, filePatterns, cdnCacheDuration) {
     const noBrowserCachingHeader = getCacheControlHeader(0, cdnCacheDuration);
-    await exec_1.exec(`aws s3 cp s3://${s3Bucket} s3://${s3Bucket} \
-    --exclude "*" \
-    ${filePatterns.map(pattern => `--include "${pattern}"`).join(' ')}
-    --recursive \
-    --metadata-directive REPLACE \
-    --cache-control "${noBrowserCachingHeader}"`);
+    await exec_1.exec([
+        `aws s3 cp ${destination} ${destination}`,
+        '--exclude "*"',
+        filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
+        '--recursive',
+        '--metadata-directive REPLACE',
+        `--cache-control "${noBrowserCachingHeader}"`
+    ].join(' '));
+}
+function makeS3Destination(bucket, path) {
+    if (path) {
+        return `s3://${bucket}/${removeLeadingSlash(path)}`;
+    }
+    else {
+        return `s3://${bucket}`;
+    }
 }
 function getCacheControlHeader(browserCacheDuration, cdnCacheDuration) {
     let header = '';
@@ -1415,7 +1456,9 @@ function getCacheControlHeader(browserCacheDuration, cdnCacheDuration) {
     header += `, s-maxage=${cdnCacheDuration}`;
     return header;
 }
-exports.getCacheControlHeader = getCacheControlHeader;
+function removeLeadingSlash(str) {
+    return str.replace(/^\/?/, '');
+}
 
 
 /***/ }),

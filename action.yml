@@ -8,6 +8,11 @@ inputs:
   dest-s3-bucket:
     description: 'Destination S3 Bucket'
     required: true
+  dest-s3-path:
+    description: 'Destination S3 Path'
+  sync-delete:
+    description: "Boolean, delete files on S3 not present in build (default: true)"
+    default: 'true'
   browser-cache-duration:
     description: 'Browser cache duration (sec) for cache control headers'
     default: '31536000'
@@ -16,6 +21,9 @@ inputs:
     default: '31536000'
   cloudfront-id-to-invalidate:
     description: 'Cloudfront ID to invalidate'
+  cloudfront-path-to-invalidate:
+    description: "Cloudfront Path to invalidate (optional, default: '/*')"
+    default: '/*'
 runs:
   using: 'node12'
   main: 'dist/index.js'

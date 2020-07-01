@@ -11,3 +11,15 @@ export function getIntInput(name: string): number {
 
   return intValue
 }
+
+export function getBooleanInput(name: string): boolean {
+  const stringValue = getInput(name)
+
+  const lcStringValue = stringValue.toLowerCase()
+
+  if (lcStringValue === 'true') return true
+
+  if (lcStringValue === 'false') return false
+
+  throw new RangeError(`Invalid '${name}': ${stringValue}`)
+}
