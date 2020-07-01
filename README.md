@@ -129,7 +129,7 @@ If you plan to use Gatsby redirects you'll need to use a Gatsby redirect plugin 
 | dest-s3-bucket | Required | The destination S3 Bucket |
 | dest-s3-path | Optional | The destination S3 Path (defaults to root) |
 | cloudfront-id-to-invalidate | Optional | The ID of the CloudFront distribution to invalidate. |
-| cloudfront-path-to-invalidate | Optional | The path to invalidate on the CloudFront distribution (default: `/*`) |
+| cloudfront-path-to-invalidate | Optional | The path to invalidate on the CloudFront distribution. See the [CloudFront Invalidation guide](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html) for information on the format (default: `/*`) |
 | public-source-path | Optional | The path to your gatsby ./public directory. Default: is `./public/` |
 | sync-delete | Optional | Boolean: delete files on S3 not in the latest Gatsby build (defaults to 'true') |
 | browser-cache-duration | Optional | The cache duration (in seconds) to instruct browsers to cache files for. This is only for files which should be cached as per [Gatsby caching recommendations](https://www.gatsbyjs.org/docs/caching/). Default is 31536000 (1 year) |
