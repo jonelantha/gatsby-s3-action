@@ -19,7 +19,7 @@ name: Deploy
 on:
   push:
     branches:
-      - master
+      - main # (could be 'master' on older repos)
 jobs:
   deploy:
     runs-on: ubuntu-latest
