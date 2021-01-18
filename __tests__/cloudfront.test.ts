@@ -1,5 +1,5 @@
-import {exec} from '@actions/exec'
-import {invalidateCloudfront} from '../src/aws/cloudfront'
+import { exec } from '@actions/exec'
+import { invalidateCloudfront } from '../src/aws/cloudfront'
 
 jest.mock('@actions/exec')
 

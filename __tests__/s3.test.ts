@@ -1,5 +1,5 @@
-import {exec} from '@actions/exec'
-import {syncToS3Bucket} from '../src/aws/s3'
+import { exec } from '@actions/exec'
+import { syncToS3Bucket } from '../src/aws/s3'
 
 jest.mock('@actions/exec')
 
