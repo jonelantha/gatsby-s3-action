@@ -1,4 +1,4 @@
-import {getInput} from '@actions/core'
+import { getInput } from '@actions/core'
 
 export function getIntInput(name: string): number {
   const stringValue = getInput(name)
