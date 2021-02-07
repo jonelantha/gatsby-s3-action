@@ -52,7 +52,8 @@ async function syncAllFiles(
     [
       `aws s3 sync ${source} ${destination}`,
       syncDelete ? '--delete' : undefined,
-      `--cache-control "${browserCachingHeader}"`
+      `--cache-control "${browserCachingHeader}"`,
+      '--debug'
     ]
       .filter(part => part)
       .join(' ')
@@ -73,7 +74,8 @@ async function setNoBrowserCaching(
       filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
       '--recursive',
       '--metadata-directive REPLACE',
-      `--cache-control "${noBrowserCachingHeader}"`
+      `--cache-control "${noBrowserCachingHeader}"`,
+      '--debug'
     ].join(' ')
   )
 }

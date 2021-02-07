@@ -1486,7 +1486,8 @@ async function syncAllFiles(source, destination, syncDelete, browserCacheDuratio
     await exec_1.exec([
         `aws s3 sync ${source} ${destination}`,
         syncDelete ? '--delete' : undefined,
-        `--cache-control "${browserCachingHeader}"`
+        `--cache-control "${browserCachingHeader}"`,
+        '--debug'
     ]
         .filter(part => part)
         .join(' '));
@@ -1499,7 +1500,8 @@ async function setNoBrowserCaching(destination, filePatterns, cdnCacheDuration) 
         filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
         '--recursive',
         '--metadata-directive REPLACE',
-        `--cache-control "${noBrowserCachingHeader}"`
+        `--cache-control "${noBrowserCachingHeader}"`,
+        '--debug'
     ].join(' '));
 }
 function makeS3Destination(bucket, path) {
