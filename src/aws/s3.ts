@@ -31,9 +31,14 @@ interface SyncS3Params {
   s3Bucket: string
   s3Path: string
   syncDelete: boolean
-  filesNotToBrowserCache: string[]
+  filesNotToBrowserCache: PatternAndContentType[]
   browserCacheDuration: number
   cdnCacheDuration: number
+}
+
+interface PatternAndContentType {
+  pattern: string
+  contentType: string
 }
 
 async function syncAllFiles(
@@ -52,8 +57,7 @@ async function syncAllFiles(
     [
       `aws s3 sync ${source} ${destination}`,
       syncDelete ? '--delete' : undefined,
-      `--cache-control "${browserCachingHeader}"`,
-      '--debug'
+      `--cache-control "${browserCachingHeader}"`
     ]
       .filter(part => part)
       .join(' ')
@@ -62,22 +66,24 @@ async function syncAllFiles(
 
 async function setNoBrowserCaching(
   destination: string,
-  filePatterns: string[],
+  filePatterns: PatternAndContentType[],
   cdnCacheDuration: number
 ): Promise<void> {
   const noBrowserCachingHeader = getCacheControlHeader(0, cdnCacheDuration)
 
-  await exec(
-    [
-      `aws s3 cp ${destination} ${destination}`,
-      '--exclude "*"',
-      filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
-      '--recursive',
-      '--metadata-directive REPLACE',
-      `--cache-control "${noBrowserCachingHeader}"`,
-      '--debug'
-    ].join(' ')
-  )
+  for (const { pattern, contentType } of filePatterns) {
+    await exec(
+      [
+        `aws s3 cp ${destination} ${destination}`,
+        '--exclude "*"',
+        `--include "${pattern}"`,
+        '--recursive',
+        '--metadata-directive REPLACE',
+        `--cache-control "${noBrowserCachingHeader}"`,
+        `--content-type "${contentType}"`
+      ].join(' ')
+    )
+  }
 }
 
 function makeS3Destination(bucket: string, path?: string): string {

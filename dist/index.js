@@ -1045,7 +1045,11 @@ async function deploy() {
         s3Bucket: core_1.getInput('dest-s3-bucket', { required: true }),
         s3Path: core_1.getInput('dest-s3-path'),
         syncDelete: input_1.getBooleanInput('sync-delete'),
-        filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
+        filesNotToBrowserCache: [
+            { pattern: '*.html', contentType: 'text/html' },
+            { pattern: 'page-data/*.json', contentType: 'application/json' },
+            { pattern: 'sw.js', contentType: 'application/javascript' }
+        ],
         browserCacheDuration: input_1.getIntInput('browser-cache-duration'),
         cdnCacheDuration: input_1.getIntInput('cdn-cache-duration')
     });
@@ -1486,23 +1490,24 @@ async function syncAllFiles(source, destination, syncDelete, browserCacheDuratio
     await exec_1.exec([
         `aws s3 sync ${source} ${destination}`,
         syncDelete ? '--delete' : undefined,
-        `--cache-control "${browserCachingHeader}"`,
-        '--debug'
+        `--cache-control "${browserCachingHeader}"`
     ]
         .filter(part => part)
         .join(' '));
 }
 async function setNoBrowserCaching(destination, filePatterns, cdnCacheDuration) {
     const noBrowserCachingHeader = getCacheControlHeader(0, cdnCacheDuration);
-    await exec_1.exec([
-        `aws s3 cp ${destination} ${destination}`,
-        '--exclude "*"',
-        filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
-        '--recursive',
-        '--metadata-directive REPLACE',
-        `--cache-control "${noBrowserCachingHeader}"`,
-        '--debug'
-    ].join(' '));
+    for (const { pattern, contentType } of filePatterns) {
+        await exec_1.exec([
+            `aws s3 cp ${destination} ${destination}`,
+            '--exclude "*"',
+            `--include "${pattern}"`,
+            '--recursive',
+            '--metadata-directive REPLACE',
+            `--cache-control "${noBrowserCachingHeader}"`,
+            `--content-type "${contentType}"`
+        ].join(' '));
+    }
 }
 function makeS3Destination(bucket, path) {
     if (path) {
