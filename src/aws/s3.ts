@@ -1,31 +1,22 @@
 import { exec } from '@actions/exec'
 
-export async function syncToS3Bucket({
-  localSource,
-  s3Bucket,
-  s3Path,
-  syncDelete,
-  filesNotToBrowserCache,
-  browserCacheDuration,
-  cdnCacheDuration,
-  debug
-}: SyncS3Params): Promise<void> {
-  const destination = makeS3Destination(s3Bucket, s3Path)
+export async function syncToS3Bucket(params: SyncS3Params): Promise<void> {
+  const destination = makeS3Destination(params.s3Bucket, params.s3Path)
 
   await syncAllFiles(
-    localSource,
+    params.localSource,
     destination,
-    syncDelete,
-    browserCacheDuration,
-    cdnCacheDuration,
-    debug
+    params.syncDelete,
+    params.browserCacheDuration,
+    params.cdnCacheDuration,
+    params.debug
   )
 
   await setNoBrowserCaching(
     destination,
-    filesNotToBrowserCache,
-    cdnCacheDuration,
-    debug
+    params.filesNotToBrowserCache,
+    params.cdnCacheDuration,
+    params.debug
   )
 }
 
