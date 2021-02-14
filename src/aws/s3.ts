@@ -7,7 +7,8 @@ export async function syncToS3Bucket({
   syncDelete,
   filesNotToBrowserCache,
   browserCacheDuration,
-  cdnCacheDuration
+  cdnCacheDuration,
+  debug
 }: SyncS3Params): Promise<void> {
   const destination = makeS3Destination(s3Bucket, s3Path)
 
@@ -16,13 +17,15 @@ export async function syncToS3Bucket({
     destination,
     syncDelete,
     browserCacheDuration,
-    cdnCacheDuration
+    cdnCacheDuration,
+    debug
   )
 
   await setNoBrowserCaching(
     destination,
     filesNotToBrowserCache,
-    cdnCacheDuration
+    cdnCacheDuration,
+    debug
   )
 }
 
@@ -34,6 +37,7 @@ interface SyncS3Params {
   filesNotToBrowserCache: string[]
   browserCacheDuration: number
   cdnCacheDuration: number
+  debug: boolean
 }
 
 async function syncAllFiles(
@@ -41,41 +45,47 @@ async function syncAllFiles(
   destination: string,
   syncDelete: boolean,
   browserCacheDuration: number,
-  cdnCacheDuration: number
+  cdnCacheDuration: number,
+  debug: boolean
 ): Promise<void> {
   const browserCachingHeader = getCacheControlHeader(
     browserCacheDuration,
     cdnCacheDuration
   )
 
-  await exec(
-    [
-      `aws s3 sync ${source} ${destination}`,
-      syncDelete ? '--delete' : undefined,
-      `--cache-control "${browserCachingHeader}"`
-    ]
-      .filter(part => part)
-      .join(' ')
-  )
+  const cmdParts = [
+    `aws s3 sync ${source} ${destination}`,
+    debug ? '--debug' : undefined,
+    syncDelete ? '--delete' : undefined,
+    `--cache-control "${browserCachingHeader}"`
+  ]
+
+  const cmd = cmdParts.filter(part => part).join(' ')
+
+  await exec(cmd)
 }
 
 async function setNoBrowserCaching(
   destination: string,
   filePatterns: string[],
-  cdnCacheDuration: number
+  cdnCacheDuration: number,
+  debug: boolean
 ): Promise<void> {
   const noBrowserCachingHeader = getCacheControlHeader(0, cdnCacheDuration)
 
-  await exec(
-    [
-      `aws s3 cp ${destination} ${destination}`,
-      '--exclude "*"',
-      filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
-      '--recursive',
-      '--metadata-directive REPLACE',
-      `--cache-control "${noBrowserCachingHeader}"`
-    ].join(' ')
-  )
+  const cmdParts = [
+    `aws s3 cp ${destination} ${destination}`,
+    debug ? '--debug' : undefined,
+    '--exclude "*"',
+    filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
+    '--recursive',
+    '--metadata-directive REPLACE',
+    `--cache-control "${noBrowserCachingHeader}"`
+  ]
+
+  const cmd = cmdParts.filter(part => part).join(' ')
+
+  await exec(cmd)
 }
 
 function makeS3Destination(bucket: string, path?: string): string {

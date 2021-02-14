@@ -24,6 +24,9 @@ inputs:
   cloudfront-path-to-invalidate:
     description: "Cloudfront Path to invalidate (optional, default: '/*')"
     default: '/*'
+  debug:
+    description: "Boolean, enable debug logging (default: false)"
+    default: 'false'
 runs:
   using: 'node12'
   main: 'dist/index.js'
