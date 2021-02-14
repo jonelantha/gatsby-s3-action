@@ -1,4 +1,5 @@
 import { exec } from '@actions/exec'
+import { extname } from 'path'
 
 export async function syncToS3Bucket(params: SyncS3Params): Promise<void> {
   const destination = makeS3Destination(params.s3Bucket, params.s3Path)
@@ -64,19 +65,30 @@ async function setNoBrowserCaching(
 ): Promise<void> {
   const noBrowserCachingHeader = getCacheControlHeader(0, cdnCacheDuration)
 
-  const cmdParts = [
-    `aws s3 cp ${destination} ${destination}`,
-    debug ? '--debug' : undefined,
-    '--exclude "*"',
-    filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
-    '--recursive',
-    '--metadata-directive REPLACE',
-    `--cache-control "${noBrowserCachingHeader}"`
-  ]
+  for (const filePattern of filePatterns) {
+    const extension = extname(filePattern)
+    if (!(extension in contentTypeLookup)) {
+      throw Error(`No mimetype for '${extension}'`)
+    }
 
-  const cmd = cmdParts.filter(part => part).join(' ')
+    const contentType =
+      contentTypeLookup[extension as keyof typeof contentTypeLookup]
 
-  await exec(cmd)
+    const cmdParts = [
+      `aws s3 cp ${destination} ${destination}`,
+      debug ? '--debug' : undefined,
+      '--exclude "*"',
+      `--include "${filePattern}"`,
+      '--recursive',
+      '--metadata-directive REPLACE',
+      `--cache-control "${noBrowserCachingHeader}"`,
+      `--content-type "${contentType}"`
+    ]
+
+    const cmd = cmdParts.filter(part => part).join(' ')
+
+    await exec(cmd)
+  }
 }
 
 function makeS3Destination(bucket: string, path?: string): string {
@@ -106,4 +118,10 @@ function getCacheControlHeader(
 
 function removeLeadingSlash(str: string): string {
   return str.replace(/^\/?/, '')
+}
+
+const contentTypeLookup = {
+  '.js': 'application/javascript',
+  '.json': 'application/json',
+  '.html': 'text/html'
 }
