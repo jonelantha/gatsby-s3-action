@@ -19,7 +19,8 @@ async function deploy(): Promise<void> {
   if (cloudfrontIDToInvalidate) {
     await invalidateCloudfront({
       cloudfrontID: cloudfrontIDToInvalidate,
-      paths: getInput('cloudfront-path-to-invalidate')
+      paths: getInput('cloudfront-path-to-invalidate'),
+      debug: getBooleanInput('debug')
     })
   }
 }

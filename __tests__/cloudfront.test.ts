@@ -7,19 +7,34 @@ const mockedExec = exec as jest.MockedFunction<typeof exec>
 
 const defaultParams = {
   cloudfrontID: 'abcdef1234',
-  paths: '/*'
+  paths: '/*',
+  debug: false
 }
 
 describe('aws commands to exec', () => {
   test.each([
     [
       'basic case',
-      defaultParams,
-      'aws cloudfront create-invalidation --distribution-id abcdef1234 --paths /*'
+      {
+        invalidateParams: defaultParams,
+        expectedCommand:
+          'aws cloudfront create-invalidation --distribution-id abcdef1234 --paths /*'
+      }
+    ],
+    [
+      'with debug',
+      {
+        invalidateParams: {
+          ...defaultParams,
+          debug: true
+        },
+        expectedCommand:
+          'aws cloudfront create-invalidation --debug --distribution-id abcdef1234 --paths /*'
+      }
     ]
-  ])('case: %s', async (_, invalidateParams, expectedAwsCommand) => {
+  ])('case: %s', async (_, { invalidateParams, expectedCommand }) => {
     await invalidateCloudfront(invalidateParams)
 
-    expect(mockedExec).toHaveBeenCalledWith(expectedAwsCommand)
+    expect(mockedExec).toHaveBeenCalledWith(expectedCommand)
   })
 })
