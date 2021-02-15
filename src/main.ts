@@ -11,18 +11,21 @@ async function deploy(): Promise<void> {
     syncDelete: getBooleanInput('sync-delete'),
     filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
     browserCacheDuration: getIntInput('browser-cache-duration'),
-    cdnCacheDuration: getIntInput('cdn-cache-duration')
+    cdnCacheDuration: getIntInput('cdn-cache-duration'),
+    debug: getBooleanInput('debug')
   })
 
   const cloudfrontIDToInvalidate = getInput('cloudfront-id-to-invalidate')
   if (cloudfrontIDToInvalidate) {
     await invalidateCloudfront({
       cloudfrontID: cloudfrontIDToInvalidate,
-      paths: getInput('cloudfront-path-to-invalidate')
+      paths: getInput('cloudfront-path-to-invalidate'),
+      debug: getBooleanInput('debug')
     })
   }
 }
 
+// eslint-disable-next-line github/no-then
 deploy().catch(error => {
   setFailed(error.message)
 })

@@ -134,3 +134,4 @@ If you plan to use Gatsby redirects you'll need to use a Gatsby redirect plugin 
 | sync-delete | Optional | Boolean: delete files on S3 not in the latest Gatsby build (defaults to 'true') |
 | browser-cache-duration | Optional | The cache duration (in seconds) to instruct browsers to cache files for. This is only for files which should be cached as per [Gatsby caching recommendations](https://www.gatsbyjs.org/docs/caching/). Default is 31536000 (1 year) |
 | cdn-cache-duration | Optional | The cache duration (in seconds) to instruct a CDN (if there is one) to cache files for. If on a development environment and you want to avoid issuing CloudFront invalidations you could set this to 0. Default is 31536000 (1 year) |
+| debug | Optional | Boolean: enable debug logging (defaults to 'false') |

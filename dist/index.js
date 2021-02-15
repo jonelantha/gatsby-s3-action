@@ -1047,16 +1047,19 @@ async function deploy() {
         syncDelete: input_1.getBooleanInput('sync-delete'),
         filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
         browserCacheDuration: input_1.getIntInput('browser-cache-duration'),
-        cdnCacheDuration: input_1.getIntInput('cdn-cache-duration')
+        cdnCacheDuration: input_1.getIntInput('cdn-cache-duration'),
+        debug: input_1.getBooleanInput('debug')
     });
     const cloudfrontIDToInvalidate = core_1.getInput('cloudfront-id-to-invalidate');
     if (cloudfrontIDToInvalidate) {
         await cloudfront_1.invalidateCloudfront({
             cloudfrontID: cloudfrontIDToInvalidate,
-            paths: core_1.getInput('cloudfront-path-to-invalidate')
+            paths: core_1.getInput('cloudfront-path-to-invalidate'),
+            debug: input_1.getBooleanInput('debug')
         });
     }
 }
+// eslint-disable-next-line github/no-then
 deploy().catch(error => {
     core_1.setFailed(error.message);
 });
@@ -1410,12 +1413,15 @@ exports.getState = getState;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.invalidateCloudfront = void 0;
 const exec_1 = __webpack_require__(986);
-async function invalidateCloudfront({ cloudfrontID, paths }) {
-    await exec_1.exec([
+async function invalidateCloudfront({ cloudfrontID, paths, debug }) {
+    const cmdParts = [
         'aws cloudfront create-invalidation',
+        debug ? '--debug' : undefined,
         `--distribution-id ${cloudfrontID}`,
         `--paths ${paths}`
-    ].join(' '));
+    ];
+    const cmd = cmdParts.filter(part => part).join(' ');
+    await exec_1.exec(cmd);
 }
 exports.invalidateCloudfront = invalidateCloudfront;
 
@@ -1475,32 +1481,45 @@ module.exports = require("path");
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.syncToS3Bucket = void 0;
 const exec_1 = __webpack_require__(986);
-async function syncToS3Bucket({ localSource, s3Bucket, s3Path, syncDelete, filesNotToBrowserCache, browserCacheDuration, cdnCacheDuration }) {
-    const destination = makeS3Destination(s3Bucket, s3Path);
-    await syncAllFiles(localSource, destination, syncDelete, browserCacheDuration, cdnCacheDuration);
-    await setNoBrowserCaching(destination, filesNotToBrowserCache, cdnCacheDuration);
+const path_1 = __webpack_require__(622);
+async function syncToS3Bucket(params) {
+    const destination = makeS3Destination(params.s3Bucket, params.s3Path);
+    await syncAllFiles(params.localSource, destination, params.syncDelete, params.browserCacheDuration, params.cdnCacheDuration, params.debug);
+    await setNoBrowserCaching(destination, params.filesNotToBrowserCache, params.cdnCacheDuration, params.debug);
 }
 exports.syncToS3Bucket = syncToS3Bucket;
-async function syncAllFiles(source, destination, syncDelete, browserCacheDuration, cdnCacheDuration) {
+async function syncAllFiles(source, destination, syncDelete, browserCacheDuration, cdnCacheDuration, debug) {
     const browserCachingHeader = getCacheControlHeader(browserCacheDuration, cdnCacheDuration);
-    await exec_1.exec([
+    const cmdParts = [
         `aws s3 sync ${source} ${destination}`,
+        debug ? '--debug' : undefined,
         syncDelete ? '--delete' : undefined,
         `--cache-control "${browserCachingHeader}"`
-    ]
-        .filter(part => part)
-        .join(' '));
+    ];
+    const cmd = cmdParts.filter(part => part).join(' ');
+    await exec_1.exec(cmd);
 }
-async function setNoBrowserCaching(destination, filePatterns, cdnCacheDuration) {
+async function setNoBrowserCaching(destination, filePatterns, cdnCacheDuration, debug) {
     const noBrowserCachingHeader = getCacheControlHeader(0, cdnCacheDuration);
-    await exec_1.exec([
-        `aws s3 cp ${destination} ${destination}`,
-        '--exclude "*"',
-        filePatterns.map(pattern => `--include "${pattern}"`).join(' '),
-        '--recursive',
-        '--metadata-directive REPLACE',
-        `--cache-control "${noBrowserCachingHeader}"`
-    ].join(' '));
+    for (const filePattern of filePatterns) {
+        const extension = path_1.extname(filePattern);
+        if (!(extension in contentTypeLookup)) {
+            throw Error(`No mimetype for '${extension}'`);
+        }
+        const contentType = contentTypeLookup[extension];
+        const cmdParts = [
+            `aws s3 cp ${destination} ${destination}`,
+            debug ? '--debug' : undefined,
+            '--exclude "*"',
+            `--include "${filePattern}"`,
+            '--recursive',
+            '--metadata-directive REPLACE',
+            `--cache-control "${noBrowserCachingHeader}"`,
+            `--content-type "${contentType}"`
+        ];
+        const cmd = cmdParts.filter(part => part).join(' ');
+        await exec_1.exec(cmd);
+    }
 }
 function makeS3Destination(bucket, path) {
     if (path) {
@@ -1524,6 +1543,11 @@ function getCacheControlHeader(browserCacheDuration, cdnCacheDuration) {
 function removeLeadingSlash(str) {
     return str.replace(/^\/?/, '');
 }
+const contentTypeLookup = {
+    '.js': 'application/javascript',
+    '.json': 'application/json',
+    '.html': 'text/html'
+};
 
 
 /***/ }),

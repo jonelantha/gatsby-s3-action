@@ -2,18 +2,23 @@ import { exec } from '@actions/exec'
 
 export async function invalidateCloudfront({
   cloudfrontID,
-  paths
+  paths,
+  debug
 }: InvalidateCloudfrontParams): Promise<void> {
-  await exec(
-    [
-      'aws cloudfront create-invalidation',
-      `--distribution-id ${cloudfrontID}`,
-      `--paths ${paths}`
-    ].join(' ')
-  )
+  const cmdParts = [
+    'aws cloudfront create-invalidation',
+    debug ? '--debug' : undefined,
+    `--distribution-id ${cloudfrontID}`,
+    `--paths ${paths}`
+  ]
+
+  const cmd = cmdParts.filter(part => part).join(' ')
+
+  await exec(cmd)
 }
 
 interface InvalidateCloudfrontParams {
   cloudfrontID: string
   paths: string
+  debug: boolean
 }
