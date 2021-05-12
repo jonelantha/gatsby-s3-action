@@ -115,7 +115,7 @@ Your CloudFront distribution will need read access to your S3 bucket. More infor
 - **Origin Access Identity**: `Create New Identity`
 - **Grant Read Permissions on Bucket**: `Yes Update Bucket Policy`
 
-Also, you'll need to setup a [lambda@edge](https://aws.amazon.com/lambda/edge/) function on the CloudFront distribution to properly handle serving up `index.html` files.  More information in the [Gatsby CloudFront Lambda guide](https://blog.elantha.com/cloudfront-index-lambda/)
+Also, you'll need to setup a [CloudFront Function](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html) on the CloudFront distribution to properly handle serving up `index.html` files.  More information in the [Gatsby CloudFront Function guide](https://blog.elantha.com/cloudfront-function-index-handling/). Alternatively if you'd prefer to set up index handling using a [lambda@edge](https://aws.amazon.com/lambda/edge/) function, please see the [Gatsby CloudFront Lambda guide](https://blog.elantha.com/cloudfront-index-lambda/)
 
 ## Redirects
 
