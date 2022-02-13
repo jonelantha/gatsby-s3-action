@@ -2,7 +2,7 @@
 
 **Deploy a Gatsby site to an AWS S3 bucket and optionally invalidate a CloudFront distribution**
 
-- Support Gatsby v2 & v3 🚀
+- Supports Gatsby v4, v3 & v2 static sites 🚀
 - Copies a Gatsby site to the root of an S3 bucket (uses `sync --delete` so old files in the bucket will be removed - can be disabled by using `sync-delete: false`, see [Parameters Reference](#parameters-reference)).
 - Sets cache headers as defined by the rules described in the [Gatsby documentation](https://www.gatsbyjs.org/docs/caching/).
 - Fast - uses AWS Cli commands for mass file operations which only create/modify files as needed.
