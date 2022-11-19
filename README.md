@@ -2,7 +2,7 @@
 
 **Deploy a Gatsby site to an AWS S3 bucket and optionally invalidate a CloudFront distribution**
 
-- Supports Gatsby v4, v3 & v2 static (SSG) sites 🚀
+- Supports Gatsby v5, v4, v3 & v2 static (SSG) sites 🚀
 - Copies a Gatsby site to the root of an S3 bucket (uses `sync --delete` so old files in the bucket will be removed - can be disabled by using `sync-delete: false`, see [Parameters Reference](#parameters-reference)).
 - Sets cache headers as defined by the rules described in the [Gatsby documentation](https://www.gatsbyjs.org/docs/caching/).
 - Fast - uses AWS Cli commands for mass file operations which only create/modify files as needed.
@@ -27,23 +27,23 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
       - name: Build
         run: |
           npm ci
           npm run build
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v1
+        uses: jonelantha/gatsby-s3-action@v2
         with:
           dest-s3-bucket: your_bucket
 ```
@@ -58,7 +58,7 @@ Add the `cloudfront-id-to-invalidate` parameter to specify the ID of a distribut
 
 ```yaml
      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v1
+        uses: jonelantha/gatsby-s3-action@v2
         with:
           dest-s3-bucket: your_bucket
           cloudfront-id-to-invalidate: CLOUDFRONTID
@@ -70,7 +70,7 @@ Add the `dest-s3-path` parameter to specify a sub-directory to copy to in your b
 
 ```yaml
      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v1
+        uses: jonelantha/gatsby-s3-action@v2
         with:
           dest-s3-bucket: your_bucket
           dest-s3-path: blog/files
@@ -82,7 +82,7 @@ Gatsby builds to ./public by default. If you've changed the build directory to s
 
 ```yaml
      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v1
+        uses: jonelantha/gatsby-s3-action@v2
         with:
           dest-s3-bucket: your_bucket
           public-source-path: ./build/
