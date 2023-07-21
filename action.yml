@@ -11,7 +11,7 @@ inputs:
   dest-s3-path:
     description: 'Destination S3 Path'
   sync-delete:
-    description: "Boolean, delete files on S3 not present in build (default: true)"
+    description: 'Boolean, delete files on S3 not present in build (default: true)'
     default: 'true'
   browser-cache-duration:
     description: 'Browser cache duration (sec) for cache control headers'
@@ -25,7 +25,7 @@ inputs:
     description: "Cloudfront Path to invalidate (optional, default: '/*')"
     default: '/*'
   debug:
-    description: "Boolean, enable debug logging (default: false)"
+    description: 'Boolean, enable debug logging (default: false)'
     default: 'false'
 runs:
   using: 'node16'

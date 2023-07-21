@@ -1,4 +1,3 @@
-/* eslint-disable filenames/match-regex */
 import { exec } from '@actions/exec'
 import { invalidateCloudfront } from '../src/aws/cloudfront'
 

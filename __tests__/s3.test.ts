@@ -1,4 +1,3 @@
-/* eslint-disable filenames/match-regex */
 import { exec } from '@actions/exec'
 import { syncToS3Bucket } from '../src/aws/s3'
 

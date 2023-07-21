@@ -20,7 +20,7 @@ name: Deploy
 on:
   push:
     branches:
-      - main            # could be 'master' on older repos
+      - main # could be 'master' on older repos
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -37,7 +37,7 @@ jobs:
           npm ci
           npm run build
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -93,9 +93,10 @@ Gatsby builds to ./public by default. If you've changed the build directory to s
 ### AWS IAM Secrets
 
 You'll need to [setup an AWS IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html) with `Programmatic Access` and then configure the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` in the Settings/Secrets area of the repo. Ideally you should follow [Amazon IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) and grant least privileges to the user:
-  - `s3:ListBucket` on `arn:aws:s3:::your_bucket`
-  - `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on `arn:aws:s3:::your_bucket/*`
-  - *(only if you're using CloudFront)* `cloudfront:CreateInvalidation` on `arn:aws:cloudfront::YOURACCOUNT_ID:distribution/YOURCLOUDFRONTID`
+
+- `s3:ListBucket` on `arn:aws:s3:::your_bucket`
+- `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on `arn:aws:s3:::your_bucket/*`
+- _(only if you're using CloudFront)_ `cloudfront:CreateInvalidation` on `arn:aws:cloudfront::YOURACCOUNT_ID:distribution/YOURCLOUDFRONTID`
 
 _For a complete walkthrough of setting up the user, please see the first section of the associated [Setting up Github Actions for Gatsby](https://blog.elantha.com/gatsby-github-actions/) guide_
 
@@ -115,24 +116,25 @@ Your CloudFront distribution will need read access to your S3 bucket. More infor
 - **Origin Access Identity**: `Create New Identity`
 - **Grant Read Permissions on Bucket**: `Yes Update Bucket Policy`
 
-Also, you'll need to setup a [CloudFront Function](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html) on the CloudFront distribution to properly handle serving up `index.html` files.  More information in the [Gatsby CloudFront Function guide](https://blog.elantha.com/cloudfront-function-index-handling/). Alternatively if you'd prefer to set up index handling using a [lambda@edge](https://aws.amazon.com/lambda/edge/) function, please see the [Gatsby CloudFront Lambda guide](https://blog.elantha.com/cloudfront-index-lambda/)
+Also, you'll need to setup a [CloudFront Function](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html) on the CloudFront distribution to properly handle serving up `index.html` files. More information in the [Gatsby CloudFront Function guide](https://blog.elantha.com/cloudfront-function-index-handling/). Alternatively if you'd prefer to set up index handling using a [lambda@edge](https://aws.amazon.com/lambda/edge/) function, please see the [Gatsby CloudFront Lambda guide](https://blog.elantha.com/cloudfront-index-lambda/)
 
 ## Redirects
 
 If you plan to use Gatsby redirects you'll need to use a Gatsby redirect plugin such as one of the following:
+
 - [gatsby-plugin-client-side-redirect](https://www.gatsbyjs.org/packages/gatsby-plugin-client-side-redirect/)
 - [gatsby-plugin-meta-redirect](https://www.gatsbyjs.org/packages/gatsby-plugin-meta-redirect/)
 
 ## Parameters Reference
 
-| Argument | Status | Description |
-|--------|-------|------------|
-| dest-s3-bucket | Required | The destination S3 Bucket |
-| dest-s3-path | Optional | The destination S3 Path (defaults to root) |
-| cloudfront-id-to-invalidate | Optional | The ID of the CloudFront distribution to invalidate. |
-| cloudfront-path-to-invalidate | Optional | The path to invalidate on the CloudFront distribution. See the [CloudFront Invalidation guide](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html) for information on the format (default: `/*`) |
-| public-source-path | Optional | The path to your gatsby ./public directory. Default: is `./public/` |
-| sync-delete | Optional | Boolean: delete files on S3 not in the latest Gatsby build (defaults to 'true') |
-| browser-cache-duration | Optional | The cache duration (in seconds) to instruct browsers to cache files for. This is only for files which should be cached as per [Gatsby caching recommendations](https://www.gatsbyjs.org/docs/caching/). Default is 31536000 (1 year) |
-| cdn-cache-duration | Optional | The cache duration (in seconds) to instruct a CDN (if there is one) to cache files for. If on a development environment and you want to avoid issuing CloudFront invalidations you could set this to 0. Default is 31536000 (1 year) |
-| debug | Optional | Boolean: enable debug logging (defaults to 'false') |
+| Argument                      | Status   | Description                                                                                                                                                                                                                          |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| dest-s3-bucket                | Required | The destination S3 Bucket                                                                                                                                                                                                            |
+| dest-s3-path                  | Optional | The destination S3 Path (defaults to root)                                                                                                                                                                                           |
+| cloudfront-id-to-invalidate   | Optional | The ID of the CloudFront distribution to invalidate.                                                                                                                                                                                 |
+| cloudfront-path-to-invalidate | Optional | The path to invalidate on the CloudFront distribution. See the [CloudFront Invalidation guide](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html) for information on the format (default: `/*`)   |
+| public-source-path            | Optional | The path to your gatsby ./public directory. Default: is `./public/`                                                                                                                                                                  |
+| sync-delete                   | Optional | Boolean: delete files on S3 not in the latest Gatsby build (defaults to 'true')                                                                                                                                                      |
+| browser-cache-duration        | Optional | The cache duration (in seconds) to instruct browsers to cache files for. This is only for files which should be cached as per [Gatsby caching recommendations](https://www.gatsbyjs.org/docs/caching/). Default is 31536000 (1 year) |
+| cdn-cache-duration            | Optional | The cache duration (in seconds) to instruct a CDN (if there is one) to cache files for. If on a development environment and you want to avoid issuing CloudFront invalidations you could set this to 0. Default is 31536000 (1 year) |
+| debug                         | Optional | Boolean: enable debug logging (defaults to 'false')                                                                                                                                                                                  |
