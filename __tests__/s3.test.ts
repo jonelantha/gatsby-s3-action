@@ -10,6 +10,7 @@ const defaultParams = {
   s3Bucket: 'mybucket',
   s3Path: '',
   syncDelete: true,
+  sizeOnly: false,
   filesNotToBrowserCache: ['*.html', 'sw.js'],
   browserCacheDuration: 456,
   cdnCacheDuration: 123,
@@ -66,6 +67,20 @@ describe('aws commands to exec', () => {
         },
         expectedCommands: [
           'aws s3 sync ./public/ s3://mybucket --cache-control "public, max-age=456, immutable, s-maxage=123"',
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*.html" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "text/html"',
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"'
+        ]
+      }
+    ],
+    [
+      'with size only set to true',
+      {
+        syncParams: {
+          ...defaultParams,
+          sizeOnly: true
+        },
+        expectedCommands: [
+          'aws s3 sync ./public/ s3://mybucket --delete --size-only --cache-control "public, max-age=456, immutable, s-maxage=123"',
           'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*.html" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "text/html"',
           'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"'
         ]

@@ -35,16 +35,17 @@ const exec_1 = __nccwpck_require__(514);
 const path_1 = __nccwpck_require__(17);
 async function syncToS3Bucket(params) {
     const destination = makeS3Destination(params.s3Bucket, params.s3Path);
-    await syncAllFiles(params.localSource, destination, params.syncDelete, params.browserCacheDuration, params.cdnCacheDuration, params.debug);
+    await syncAllFiles(params.localSource, destination, params.syncDelete, params.sizeOnly, params.browserCacheDuration, params.cdnCacheDuration, params.debug);
     await setNoBrowserCaching(destination, params.filesNotToBrowserCache, params.cdnCacheDuration, params.debug);
 }
 exports.syncToS3Bucket = syncToS3Bucket;
-async function syncAllFiles(source, destination, syncDelete, browserCacheDuration, cdnCacheDuration, debug) {
+async function syncAllFiles(source, destination, syncDelete, sizeOnly, browserCacheDuration, cdnCacheDuration, debug) {
     const browserCachingHeader = getCacheControlHeader(browserCacheDuration, cdnCacheDuration);
     const cmdParts = [
         `aws s3 sync ${source} ${destination}`,
         debug ? '--debug' : undefined,
         syncDelete ? '--delete' : undefined,
+        sizeOnly ? '--size-only' : undefined,
         `--cache-control "${browserCachingHeader}"`
     ];
     const cmd = cmdParts.filter(part => part).join(' ');
@@ -2081,6 +2082,19 @@ class HttpClientResponse {
             }));
         });
     }
+    readBodyBuffer() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+                const chunks = [];
+                this.message.on('data', (chunk) => {
+                    chunks.push(chunk);
+                });
+                this.message.on('end', () => {
+                    resolve(Buffer.concat(chunks));
+                });
+            }));
+        });
+    }
 }
 exports.HttpClientResponse = HttpClientResponse;
 function isHttps(requestUrl) {
@@ -2585,7 +2599,13 @@ function getProxyUrl(reqUrl) {
         }
     })();
     if (proxyVar) {
-        return new URL(proxyVar);
+        try {
+            return new URL(proxyVar);
+        }
+        catch (_a) {
+            if (!proxyVar.startsWith('http://') && !proxyVar.startsWith('https://'))
+                return new URL(`http://${proxyVar}`);
+        }
     }
     else {
         return undefined;
@@ -4236,6 +4256,7 @@ async function deploy() {
         s3Bucket: (0, core_1.getInput)('dest-s3-bucket', { required: true }),
         s3Path: (0, core_1.getInput)('dest-s3-path'),
         syncDelete: (0, input_1.getBooleanInput)('sync-delete'),
+        sizeOnly: (0, input_1.getBooleanInput)('only-size-changed'),
         filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
         browserCacheDuration: (0, input_1.getIntInput)('browser-cache-duration'),
         cdnCacheDuration: (0, input_1.getIntInput)('cdn-cache-duration'),
