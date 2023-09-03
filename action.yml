@@ -10,6 +10,9 @@ inputs:
     required: true
   dest-s3-path:
     description: 'Destination S3 Path'
+  only-size-changed:
+    description: 'Boolean, sync only files where size has changed since last deploy (default: false)'
+    default: 'false'
   sync-delete:
     description: 'Boolean, delete files on S3 not present in build (default: true)'
     default: 'true'

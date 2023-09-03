@@ -9,6 +9,7 @@ async function deploy(): Promise<void> {
     s3Bucket: getInput('dest-s3-bucket', { required: true }),
     s3Path: getInput('dest-s3-path'),
     syncDelete: getBooleanInput('sync-delete'),
+    sizeOnly: getBooleanInput('only-size-changed'),
     filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
     browserCacheDuration: getIntInput('browser-cache-duration'),
     cdnCacheDuration: getIntInput('cdn-cache-duration'),
