@@ -27,23 +27,23 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Build
         run: |
           npm ci
           npm run build
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v2
+        uses: jonelantha/gatsby-s3-action@v3
         with:
           dest-s3-bucket: your_bucket
 ```
@@ -58,7 +58,7 @@ Add the `cloudfront-id-to-invalidate` parameter to specify the ID of a distribut
 
 ```yaml
      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v2
+        uses: jonelantha/gatsby-s3-action@v3
         with:
           dest-s3-bucket: your_bucket
           cloudfront-id-to-invalidate: CLOUDFRONTID
@@ -70,7 +70,7 @@ Add the `dest-s3-path` parameter to specify a sub-directory to copy to in your b
 
 ```yaml
      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v2
+        uses: jonelantha/gatsby-s3-action@v3
         with:
           dest-s3-bucket: your_bucket
           dest-s3-path: blog/files
@@ -82,7 +82,7 @@ Gatsby builds to ./public by default. If you've changed the build directory to s
 
 ```yaml
      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v2
+        uses: jonelantha/gatsby-s3-action@v3
         with:
           dest-s3-bucket: your_bucket
           public-source-path: ./build/
