@@ -1,5 +1,5 @@
 import { exec } from '@actions/exec'
-import { extname } from 'path'
+import { extname } from 'node:path'
 
 export async function syncToS3Bucket(params: SyncS3Params): Promise<void> {
   const destination = makeS3Destination(params.s3Bucket, params.s3Path)
