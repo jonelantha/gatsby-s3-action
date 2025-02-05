@@ -124,10 +124,8 @@ function removeLeadingSlash(str: string): string {
   return str.replace(/^\/?/, '')
 }
 
-/* eslint-disable @typescript-eslint/naming-convention */
 const contentTypeLookup = {
   '.js': 'application/javascript',
   '.json': 'application/json',
   '.html': 'text/html'
 }
-/* eslint-enable @typescript-eslint/naming-convention */
