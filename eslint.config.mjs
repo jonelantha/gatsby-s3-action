@@ -1,14 +1,13 @@
 // @ts-check
 
 import eslint from '@eslint/js'
+import { defineConfig } from '@eslint/config-helpers'
 import tseslint from 'typescript-eslint'
 import githublint from 'eslint-plugin-github'
 import pluginJest from 'eslint-plugin-jest'
 
-export default tseslint.config(
-  {
-    ignores: ['dist/', 'lib/', 'jest.config.js', 'eslint.config.mjs']
-  },
+export default defineConfig(
+  { ignores: ['dist/', 'lib/', 'jest.config.js', 'eslint.config.mjs'] },
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   githublint.getFlatConfigs().recommended,
@@ -26,7 +25,7 @@ export default tseslint.config(
     }
   },
   {
-    ...pluginJest.configs['flat/recommended'],
+    extends: [pluginJest.configs['flat/recommended']],
     files: ['**/*.test.ts']
   }
 )
