@@ -27,27 +27,28 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
       - name: Build
         run: |
           npm ci
           npm run build
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
       - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v3
+        uses: jonelantha/gatsby-s3-action@v4
         with:
           dest-s3-bucket: your_bucket
 ```
 
+- **NOTE** - the above example uses long-lived AWS access tokens which are no longer recommended, please see [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) for preferred approaches such as configuring OIDC
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` are obtained from the AWS console, see [AWS IAM Secrets](#aws-iam-secrets) below.
 - `your_bucket` should be changed to the name of your bucket
 - See [Parameters Reference](#parameters-reference) below for the full list of parameters
@@ -58,7 +59,7 @@ Add the `cloudfront-id-to-invalidate` parameter to specify the ID of a distribut
 
 ```yaml
      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v3
+        uses: jonelantha/gatsby-s3-action@v4
         with:
           dest-s3-bucket: your_bucket
           cloudfront-id-to-invalidate: CLOUDFRONTID
@@ -70,7 +71,7 @@ Add the `dest-s3-path` parameter to specify a sub-directory to copy to in your b
 
 ```yaml
      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v3
+        uses: jonelantha/gatsby-s3-action@v4
         with:
           dest-s3-bucket: your_bucket
           dest-s3-path: blog/files
@@ -82,7 +83,7 @@ Gatsby builds to ./public by default. If you've changed the build directory to s
 
 ```yaml
      - name: Deploy
-        uses: jonelantha/gatsby-s3-action@v3
+        uses: jonelantha/gatsby-s3-action@v4
         with:
           dest-s3-bucket: your_bucket
           public-source-path: ./build/
@@ -92,7 +93,7 @@ Gatsby builds to ./public by default. If you've changed the build directory to s
 
 ### AWS IAM Secrets
 
-You'll need to [setup an AWS IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html) with `Programmatic Access` and then configure the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` in the Settings/Secrets area of the repo. Ideally you should follow [Amazon IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) and grant least privileges to the user:
+Long-lived AWS access tokens are no longer recommended (please see [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) for preferred approaches) but if you are using them you'll need to [setup an AWS IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html) with `Programmatic Access` and then configure the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` in the Settings/Secrets area of the repo. Ideally you should follow [Amazon IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) and grant least privileges to the user:
 
 - `s3:ListBucket` on `arn:aws:s3:::your_bucket`
 - `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on `arn:aws:s3:::your_bucket/*`
