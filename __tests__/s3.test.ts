@@ -11,7 +11,12 @@ const defaultParams = {
   s3Path: '',
   syncDelete: true,
   sizeOnly: false,
-  filesNotToBrowserCache: ['*.html', 'sw.js'],
+  filesNotToBrowserCache: [
+    '*.html',
+    '*sw.js',
+    '*app-data.json',
+    '*page-data/*.json'
+  ],
   browserCacheDuration: 456,
   cdnCacheDuration: 123,
   debug: false
@@ -26,7 +31,9 @@ describe('aws commands to exec', () => {
         expectedCommands: [
           'aws s3 sync ./public/ s3://mybucket --delete --cache-control "public, max-age=456, immutable, s-maxage=123"',
           'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*.html" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "text/html"',
-          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"'
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"',
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*app-data.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"',
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*page-data/*.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"'
         ]
       }
     ],
@@ -40,7 +47,9 @@ describe('aws commands to exec', () => {
         expectedCommands: [
           'aws s3 sync ./public/ s3://mybucket/mypath --delete --cache-control "public, max-age=456, immutable, s-maxage=123"',
           'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "*.html" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "text/html"',
-          'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"'
+          'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "*sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"',
+          'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "*app-data.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"',
+          'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "*page-data/*.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"'
         ]
       }
     ],
@@ -54,7 +63,9 @@ describe('aws commands to exec', () => {
         expectedCommands: [
           'aws s3 sync ./public/ s3://mybucket/mypath --delete --cache-control "public, max-age=456, immutable, s-maxage=123"',
           'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "*.html" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "text/html"',
-          'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"'
+          'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "*sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"',
+          'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "*app-data.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"',
+          'aws s3 cp s3://mybucket/mypath s3://mybucket/mypath --exclude "*" --include "*page-data/*.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"'
         ]
       }
     ],
@@ -68,7 +79,9 @@ describe('aws commands to exec', () => {
         expectedCommands: [
           'aws s3 sync ./public/ s3://mybucket --cache-control "public, max-age=456, immutable, s-maxage=123"',
           'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*.html" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "text/html"',
-          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"'
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"',
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*app-data.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"',
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*page-data/*.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"'
         ]
       }
     ],
@@ -82,7 +95,9 @@ describe('aws commands to exec', () => {
         expectedCommands: [
           'aws s3 sync ./public/ s3://mybucket --delete --size-only --cache-control "public, max-age=456, immutable, s-maxage=123"',
           'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*.html" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "text/html"',
-          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"'
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"',
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*app-data.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"',
+          'aws s3 cp s3://mybucket s3://mybucket --exclude "*" --include "*page-data/*.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"'
         ]
       }
     ],
@@ -96,7 +111,9 @@ describe('aws commands to exec', () => {
         expectedCommands: [
           'aws s3 sync ./public/ s3://mybucket --debug --delete --cache-control "public, max-age=456, immutable, s-maxage=123"',
           'aws s3 cp s3://mybucket s3://mybucket --debug --exclude "*" --include "*.html" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "text/html"',
-          'aws s3 cp s3://mybucket s3://mybucket --debug --exclude "*" --include "sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"'
+          'aws s3 cp s3://mybucket s3://mybucket --debug --exclude "*" --include "*sw.js" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/javascript"',
+          'aws s3 cp s3://mybucket s3://mybucket --debug --exclude "*" --include "*app-data.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"',
+          'aws s3 cp s3://mybucket s3://mybucket --debug --exclude "*" --include "*page-data/*.json" --recursive --metadata-directive REPLACE --cache-control "public, max-age=0, must-revalidate, s-maxage=123" --content-type "application/json"'
         ]
       }
     ]

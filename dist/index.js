@@ -27711,7 +27711,12 @@ async function deploy() {
         s3Path: (0, core_1.getInput)('dest-s3-path'),
         syncDelete: (0, input_1.getBooleanInput)('sync-delete'),
         sizeOnly: (0, input_1.getBooleanInput)('only-size-changed'),
-        filesNotToBrowserCache: ['*.html', 'page-data/*.json', 'sw.js'],
+        filesNotToBrowserCache: [
+            '*.html',
+            '*sw.js',
+            '*app-data.json',
+            '*page-data/*.json'
+        ],
         browserCacheDuration: (0, input_1.getIntInput)('browser-cache-duration'),
         cdnCacheDuration: (0, input_1.getIntInput)('cdn-cache-duration'),
         debug: (0, input_1.getBooleanInput)('debug')
