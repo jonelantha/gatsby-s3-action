@@ -1,9 +1,17 @@
-import { exec } from '@actions/exec'
-import { invalidateCloudfront } from '../src/aws/cloudfront'
+import assert from 'node:assert/strict'
+import { beforeEach, describe, mock, test } from 'node:test'
+import type { exec as Exec } from '@actions/exec'
 
-jest.mock('@actions/exec')
+const exec = mock.fn<typeof Exec>(() => Promise.resolve(0))
+mock.module('@actions/exec', { exports: { exec } })
 
-const mockedExec = exec as jest.MockedFunction<typeof exec>
+// node needs the .ts extension to load the source directly
+// eslint-disable-next-line import/extensions
+const { invalidateCloudfront } = await import('../src/aws/cloudfront.ts')
+
+type InvalidateParams = Parameters<typeof invalidateCloudfront>[0]
+
+beforeEach(() => exec.mock.resetCalls())
 
 const defaultParams = {
   cloudfrontID: 'abcdef1234',
@@ -11,30 +19,40 @@ const defaultParams = {
   debug: false
 }
 
-describe('aws commands to exec', () => {
-  test.each([
-    [
-      'basic case',
-      {
-        invalidateParams: defaultParams,
-        expectedCommand:
-          'aws cloudfront create-invalidation --distribution-id abcdef1234 --paths /*'
-      }
-    ],
-    [
-      'with debug',
-      {
-        invalidateParams: {
-          ...defaultParams,
-          debug: true
-        },
-        expectedCommand:
-          'aws cloudfront create-invalidation --debug --distribution-id abcdef1234 --paths /*'
-      }
-    ]
-  ])('case: %s', async (_, { invalidateParams, expectedCommand }) => {
-    await invalidateCloudfront(invalidateParams)
+const cases: [
+  string,
+  { invalidateParams: InvalidateParams; expectedCommand: string }
+][] = [
+  [
+    'basic case',
+    {
+      invalidateParams: defaultParams,
+      expectedCommand:
+        'aws cloudfront create-invalidation --distribution-id abcdef1234 --paths /*'
+    }
+  ],
+  [
+    'with debug',
+    {
+      invalidateParams: {
+        ...defaultParams,
+        debug: true
+      },
+      expectedCommand:
+        'aws cloudfront create-invalidation --debug --distribution-id abcdef1234 --paths /*'
+    }
+  ]
+]
 
-    expect(mockedExec).toHaveBeenCalledWith(expectedCommand)
-  })
+void describe('aws commands to exec', () => {
+  for (const [name, { invalidateParams, expectedCommand }] of cases) {
+    void test(`case: ${name}`, async () => {
+      await invalidateCloudfront(invalidateParams)
+
+      assert.deepEqual(
+        exec.mock.calls.map(call => call.arguments[0]),
+        [expectedCommand]
+      )
+    })
+  }
 })
