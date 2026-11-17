@@ -6,7 +6,6 @@ const exec = mock.fn<typeof Exec>(() => Promise.resolve(0))
 mock.module('@actions/exec', { exports: { exec } })
 
 // node needs the .ts extension to load the source directly
-// eslint-disable-next-line import/extensions
 const { invalidateCloudfront } = await import('../src/aws/cloudfront.ts')
 
 type InvalidateParams = Parameters<typeof invalidateCloudfront>[0]

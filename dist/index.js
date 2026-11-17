@@ -27724,7 +27724,6 @@ async function deploy() {
         });
     }
 }
-// eslint-disable-next-line github/no-then
 deploy().catch(error => {
     (0, core_1.setFailed)(error instanceof Error ? error.message : String(error));
 });
