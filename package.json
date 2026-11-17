@@ -5,7 +5,7 @@
   "description": "Deploy a Gatsby Project to an AWS S3 bucket (optional Cloudfront support)",
   "main": "lib/main.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit && tsc --noEmit -p __tests__",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint",
@@ -37,7 +37,7 @@
     "eslint": "^9.38.0",
     "eslint-plugin-github": "^6.0.0",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.2"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2"
   }
 }
