@@ -6,8 +6,8 @@
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc --noEmit && tsc --noEmit -p __tests__",
-    "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts",
+    "format": "prettier --write \"**/*.{ts,mts,mjs}\"",
+    "format-check": "prettier --check \"**/*.{ts,mts,mjs}\"",
     "lint": "eslint",
     "pack": "ncc build src/main.ts",
     "test": "node --experimental-test-module-mocks --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test",
@@ -36,7 +36,7 @@
     "@vercel/ncc": "^0.45.0",
     "eslint": "^9.38.0",
     "eslint-plugin-github": "^6.0.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.9.10",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.2"
   }

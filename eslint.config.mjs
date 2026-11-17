@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import githublint from 'eslint-plugin-github'
 
 export default defineConfig(
-  { ignores: ['dist/', 'lib/', 'eslint.config.mjs'] },
+  { ignores: ['dist/', 'lib/', 'eslint.config.mjs', 'prettier.config.mts'] },
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   githublint.getFlatConfigs().recommended,
