@@ -19,7 +19,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version-file: package.json
+          node-version: 24 # same as the action runtime (runs.using in action.yml)
       - run: npm ci
       - run: npm run all
       - name: Check dist is up to date
