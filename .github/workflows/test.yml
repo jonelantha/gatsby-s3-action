@@ -6,11 +6,26 @@ on: # rebuild any PRs and main branch changes
       - main
       - 'releases/*'
 
+permissions:
+  contents: read
+
 jobs:
   build: # make sure build/ci work properly
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: |
-          npm install
-          npm run all
+      # Actions are pinned to commit SHAs of releases at least 7 days old
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24 # same as the action runtime (runs.using in action.yml)
+      - run: npm ci
+      - run: npm run all
+      - name: Check dist is up to date
+        run: |
+          if [ -n "$(git status --porcelain dist)" ]; then
+            git --no-pager diff --stat dist
+            echo "::error::dist is out of date, run 'npm run bundle' and commit the result"
+            exit 1
+          fi

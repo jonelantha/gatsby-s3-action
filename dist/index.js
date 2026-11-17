@@ -27688,8 +27688,7 @@ module.exports = parseParams
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat */
-/******/ 	
+/******/ 	/* webpack/runtime/asset-relocator-loader */
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
@@ -27725,7 +27724,6 @@ async function deploy() {
         });
     }
 }
-// eslint-disable-next-line github/no-then
 deploy().catch(error => {
     (0, core_1.setFailed)(error instanceof Error ? error.message : String(error));
 });

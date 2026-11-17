@@ -26,7 +26,6 @@ async function deploy(): Promise<void> {
   }
 }
 
-// eslint-disable-next-line github/no-then
 deploy().catch(error => {
   setFailed(error instanceof Error ? error.message : String(error))
 })

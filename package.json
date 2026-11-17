@@ -3,15 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "description": "Deploy a Gatsby Project to an AWS S3 bucket (optional Cloudfront support)",
-  "main": "lib/main.js",
   "scripts": {
-    "build": "tsc",
-    "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p __tests__ && tsc -p tsconfig.tooling.json",
+    "format": "prettier --write \"**/*.{ts,mts,mjs}\"",
+    "format-check": "prettier --check \"**/*.{ts,mts,mjs}\"",
     "lint": "eslint",
-    "pack": "ncc build src/main.ts",
-    "test": "jest",
-    "all": "npm run build && npm run format && npm run lint && npm run pack && npm test"
+    "test": "node --experimental-test-module-mocks --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test",
+    "check": "npm run typecheck && npm run format-check && npm run lint && npm test",
+    "bundle": "ncc build src/main.ts",
+    "all": "npm run check && npm run bundle"
   },
   "repository": {
     "type": "git",
@@ -28,20 +28,16 @@
   "author": "jonelantha",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "1.11.1",
-    "@actions/exec": "1.1.1"
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1"
   },
   "devDependencies": {
-    "@types/jest": "30.0.0",
-    "@types/node": "20.19.23",
-    "@vercel/ncc": "0.38.4",
-    "eslint": "9.38.0",
-    "eslint-plugin-github": "6.0.0",
-    "eslint-plugin-jest": "29.0.1",
-    "jest": "30.2.0",
-    "prettier": "3.6.2",
-    "ts-jest": "29.4.5",
-    "typescript": "5.9.3",
-    "typescript-eslint": "8.46.2"
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.2",
+    "@vercel/ncc": "^0.45.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2"
   }
 }

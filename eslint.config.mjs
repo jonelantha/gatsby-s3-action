@@ -1,31 +1,31 @@
 // @ts-check
 
 import eslint from '@eslint/js'
-import { defineConfig } from '@eslint/config-helpers'
+import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
-import githublint from 'eslint-plugin-github'
-import pluginJest from 'eslint-plugin-jest'
 
 export default defineConfig(
-  { ignores: ['dist/', 'lib/', 'jest.config.js', 'eslint.config.mjs'] },
+  { ignores: ['dist/'] },
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
-  githublint.getFlatConfigs().recommended,
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          // the tooling configs aren't part of tsconfig.json, see tsconfig.tooling.json
+          allowDefaultProject: ['eslint.config.mjs', 'prettier.config.mts'],
+          defaultProject: 'tsconfig.tooling.json'
+        },
         tsconfigRootDir: import.meta.dirname
       }
     }
   },
   {
     rules: {
-      'i18n-text/no-en': 'off'
+      eqeqeq: 'error',
+      'object-shorthand': 'error',
+      'prefer-template': 'error',
+      '@typescript-eslint/no-shadow': 'error'
     }
-  },
-  {
-    extends: [pluginJest.configs['flat/recommended']],
-    files: ['**/*.test.ts']
   }
 )
