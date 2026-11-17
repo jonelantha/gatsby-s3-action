@@ -9,11 +9,11 @@ on: # rebuild any PRs and main branch changes
 permissions:
   contents: read
 
-# Actions are pinned to commit SHAs of releases at least 7 days old
 jobs:
   build: # make sure build/ci work properly
     runs-on: ubuntu-latest
     steps:
+      # Actions are pinned to commit SHAs of releases at least 7 days old
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
