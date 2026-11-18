@@ -31,7 +31,12 @@ jobs:
           fi
       - name: Smoke test the bundle on the action runtime
         run: |
-          # with no inputs set, a bundle that loads and runs reports the missing input
+          # with no inputs set, a bundle that loads and runs reports the missing input.
+          # Its output is only echoed on failure: its ::error:: line would otherwise
+          # show up as an error annotation on a passing run.
           output=$(node dist/index.js 2>&1 || true)
-          echo "$output"
-          echo "$output" | grep -q "Input required and not supplied: dest-s3-bucket"
+          echo "$output" | grep -q "Input required and not supplied: dest-s3-bucket" || {
+            echo "$output"
+            echo "::error::the bundle did not run as expected"
+            exit 1
+          }
