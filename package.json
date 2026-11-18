@@ -21,8 +21,8 @@
   "author": "jonelantha",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/exec": "^1.1.1"
+    "@actions/core": "^3.0.1",
+    "@actions/exec": "^3.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
