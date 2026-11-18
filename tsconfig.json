@@ -1,8 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es2019",
-    "module": "commonjs",
-    "rootDir": "./src"
+    "target": "es2022",
+    "module": "nodenext",
+    "noEmit": true,
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true,
+    "allowJs": true,
+    "checkJs": true,
+    "types": ["node"]
   },
-  "include": ["src"]
+  "include": ["src", "scripts", "eslint.config.js", "prettier.config.ts"]
 }

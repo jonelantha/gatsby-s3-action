@@ -1,7 +1,7 @@
-import { getBooleanInput, getIntInput } from './input'
+import { getBooleanInput, getIntInput } from './input.ts'
 import { getInput, setFailed } from '@actions/core'
-import { invalidateCloudfront } from './aws/cloudfront'
-import { syncToS3Bucket } from './aws/s3'
+import { invalidateCloudfront } from './aws/cloudfront.ts'
+import { syncToS3Bucket } from './aws/s3.ts'
 
 async function deploy(): Promise<void> {
   await syncToS3Bucket({

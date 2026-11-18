@@ -1,5 +1,5 @@
 name: 'build-test'
-on: # rebuild any PRs and main branch changes
+on:
   pull_request:
   push:
     branches:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build: # make sure build/ci work properly
+  build:
     runs-on: ubuntu-latest
     steps:
       # Actions are pinned to commit SHAs of releases at least 7 days old
