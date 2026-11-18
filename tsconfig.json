@@ -9,5 +9,5 @@
     "checkJs": true,
     "types": ["node"]
   },
-  "include": ["src", "eslint.config.js", "prettier.config.ts"]
+  "include": ["src", "scripts", "eslint.config.js", "prettier.config.ts"]
 }
