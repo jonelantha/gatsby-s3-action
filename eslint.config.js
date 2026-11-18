@@ -1,5 +1,3 @@
-// @ts-check
-
 import eslint from '@eslint/js'
 import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
@@ -11,11 +9,7 @@ export default defineConfig(
   {
     languageOptions: {
       parserOptions: {
-        projectService: {
-          // the tooling configs aren't part of tsconfig.json, see tsconfig.tooling.json
-          allowDefaultProject: ['eslint.config.mjs', 'prettier.config.mts'],
-          defaultProject: 'tsconfig.tooling.json'
-        },
+        projectService: true,
         tsconfigRootDir: import.meta.dirname
       }
     }

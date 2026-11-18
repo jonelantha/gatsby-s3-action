@@ -1,5 +1,5 @@
 name: 'build-test'
-on: # rebuild any PRs and main branch changes
+on:
   pull_request:
   push:
     branches:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build: # make sure build/ci work properly
+  build:
     runs-on: ubuntu-latest
     steps:
       # Actions are pinned to commit SHAs of releases at least 7 days old
@@ -29,3 +29,9 @@ jobs:
             echo "::error::dist is out of date, run 'npm run bundle' and commit the result"
             exit 1
           fi
+      - name: Smoke test the bundle on the action runtime
+        run: |
+          # with no inputs set, a bundle that loads and runs reports the missing input
+          output=$(node dist/index.js 2>&1 || true)
+          echo "$output"
+          echo "$output" | grep -q "Input required and not supplied: dest-s3-bucket"

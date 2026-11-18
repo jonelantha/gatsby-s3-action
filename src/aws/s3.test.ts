@@ -6,7 +6,7 @@ const exec = mock.fn<typeof Exec>(() => Promise.resolve(0))
 mock.module('@actions/exec', { exports: { exec } })
 
 // node needs the .ts extension to load the source directly
-const { syncToS3Bucket } = await import('../src/aws/s3.ts')
+const { syncToS3Bucket } = await import('./s3.ts')
 
 type SyncParams = Parameters<typeof syncToS3Bucket>[0]
 
